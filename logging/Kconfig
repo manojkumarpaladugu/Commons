@@ -1,0 +1,16 @@
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+config LIB_COMMONS_LOGGING
+  bool "Enable custom logging"
+  default n
+  help
+    This option enables commons logging library.
+
+config LIB_COMMONS_TOKENIZED_LOGGING
+  bool "Enable tokenized logging"
+  depends on LIB_COMMONS_LOGGING
+  default n
+  help
+    This option enables string tokenization mode in commons logging library.
