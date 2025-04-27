@@ -3,7 +3,7 @@ The commons module is a collection of shared functionality or utilities, likely 
 
 # Features
 * Logging:
-  * A library used to print messages on any output
+  * Prints messages with a variety of logging levels.
 
 # Steps to integrate commons module in a Zephyr based project
 1. Add commons and pigweed repo's in west configuration
@@ -51,9 +51,9 @@ int main(void)
 }
 ```
 
-4. Link logging library in application's CMakeLists.txt
+4. Link commons library in application's CMakeLists.txt
 ```
 target_link_libraries(app
-    PRIVATE CommonsLogging
+    PRIVATE commons
 )
 ```
