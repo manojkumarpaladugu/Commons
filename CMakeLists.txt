@@ -12,7 +12,7 @@ target_include_directories(${COMMONS_LIBRARY_NAME}
 )
 
 target_sources(${COMMONS_LIBRARY_NAME}
-    PRIVATE commons.c
+    PRIVATE commons.cc
 )
 
 add_subdirectory(logging)

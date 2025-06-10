@@ -2,11 +2,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "custom_types.h"
+#include "common_types.h"
 
 #include <stdio.h>
 #include <pw_log_string/handler.h>
-
 
 /**
  * @brief Implementation of the log message handler used as backend for pw_log_string.handler.

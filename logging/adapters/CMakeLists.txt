@@ -34,7 +34,7 @@ else()
         CACHE STRING "Current library implements the message handler for pw_log_string"
     )
 
-    list(APPEND source_list ${CMAKE_CURRENT_SOURCE_DIR}/basic_log_to_stdout.c)
+    list(APPEND source_list ${CMAKE_CURRENT_SOURCE_DIR}/basic_log_to_stdout.cc)
 endif()
 
 target_sources(${COMMONS_LOGGING_LIBRARY_NAME} PRIVATE ${source_list})

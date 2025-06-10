@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "custom_types.h"
+#include "common_types.h"
 
 #include <pw_log/levels.h>
 
