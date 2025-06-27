@@ -1,6 +1,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+# Author: Manoj Kumar Paladugu <paladugumanojkumar@gmail.com>
+#
 
 config LIB_COMMONS_LOGGING
   bool "Enable custom logging"

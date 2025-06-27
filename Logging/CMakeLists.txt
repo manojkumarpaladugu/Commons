@@ -1,6 +1,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+# Author: Manoj Kumar Paladugu <paladugumanojkumar@gmail.com>
+#
 
 if(CONFIG_LIB_COMMONS_LOGGING)
     set(COMMONS_LOGGING_LIBRARY_NAME CommonsLogging)
