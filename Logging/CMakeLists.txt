@@ -3,7 +3,7 @@
 #
 
 if(CONFIG_LIB_COMMONS_LOGGING)
-    set(COMMONS_LOGGING_LIBRARY_NAME commons-logging)
+    set(COMMONS_LOGGING_LIBRARY_NAME CommonsLogging)
     add_library(${COMMONS_LOGGING_LIBRARY_NAME} STATIC)
 
     target_link_libraries(${COMMONS_LIBRARY_NAME}
@@ -11,9 +11,9 @@ if(CONFIG_LIB_COMMONS_LOGGING)
     )
 
     target_include_directories(${COMMONS_LOGGING_LIBRARY_NAME}
-        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include
-        PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../Include
+        PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Include
     )
 
-    add_subdirectory(adapters)
+    add_subdirectory(Adapters)
 endif()

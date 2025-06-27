@@ -4,15 +4,15 @@
 
 cmake_minimum_required(VERSION 4.0.0)
 
-set(COMMONS_LIBRARY_NAME commons)
+set(COMMONS_LIBRARY_NAME Commons)
 add_library(${COMMONS_LIBRARY_NAME} STATIC)
 
 target_include_directories(${COMMONS_LIBRARY_NAME}
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Include
 )
 
 target_sources(${COMMONS_LIBRARY_NAME}
-    PRIVATE commons.cc
+    PRIVATE Commons.cpp
 )
 
-add_subdirectory(logging)
+add_subdirectory(Logging)

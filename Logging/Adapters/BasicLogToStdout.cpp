@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "common_types.h"
+#include "CommonTypes.h"
 
 #include <stdio.h>
 #include <pw_log_string/handler.h>

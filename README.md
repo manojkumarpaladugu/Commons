@@ -1,11 +1,11 @@
 # Brief
-The commons module is a collection of shared functionality or utilities, likely intended to be reused across different parts of the project.
+The Commons module is a collection of shared functionality or utilities, likely intended to be reused across different parts of the project.
 
 # Features
 * Logging:
   * Prints messages with a variety of logging levels.
 
-# Steps to integrate commons module in a Zephyr based project
+# Steps to integrate Commons module in a Zephyr based project
 1. Add commons and pigweed repo's in west configuration
 ```
   remotes:
@@ -13,16 +13,16 @@ The commons module is a collection of shared functionality or utilities, likely 
       url-base: ssh://git@github.com
 
   projects:
-    - name: commons
+    - name: Commons
       remote: github
-      repo-path: manojkumarpaladugu/commons
+      repo-path: manojkumarpaladugu/Commons
       revision: main
-      path: modules/commons
+      path: Modules/Commons
     - name: pigweed
       remote: github
       repo-path: google/pigweed
       revision: 90d1391ff0c2fcb4717dc578bceccb2ec38643b8 # Latest as of Apr 5, 2025
-      path: third_party/pigweed
+      path: ThirdParty/pigweed
 ```
 2. Enable logging module in application's prj.conf file
 ```
@@ -42,7 +42,7 @@ CONFIG_LIB_COMMONS_TOKENIZED_LOGGING=y
 #define MODULE_LOG_LEVEL LOG_LEVEL_DEBUG
 
 // Must be included after the logging module name and logging level definitions
-#include "logging.h"
+#include "Logging.h"
 
 int main(void)
 {
@@ -54,6 +54,6 @@ int main(void)
 4. Link commons library in application's CMakeLists.txt
 ```
 target_link_libraries(app
-    PRIVATE commons
+    PRIVATE Commons
 )
 ```

@@ -35,7 +35,7 @@
 #endif
 
 // Must be included after the module name, log level and log format definitions
-#include "pigweed_logging.h"
+#include "PigweedLogging.h"
 
 #define LOG(level, fmt, ...)               \
     do {                                   \

@@ -1,5 +1,5 @@
-set(source_list)
-set(link_libs pw_log)
+set(SOURCE_LIST)
+set(LINK_LIBS pw_log)
 
 if (CONFIG_LIB_COMMONS_TOKENIZED_LOGGING)
     set(pw_log_BACKEND
@@ -22,7 +22,7 @@ if (CONFIG_LIB_COMMONS_TOKENIZED_LOGGING)
         CACHE STRING "Use the print and abort backend for pw_assert.check"
     )
 
-    list(APPEND source_list ${CMAKE_CURRENT_SOURCE_DIR}/tokenized_log_to_stdout.cc)
+    list(APPEND SOURCE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/TokenizedLogToStdout.cpp)
 else()
     set(pw_log_BACKEND
         pw_log_string
@@ -34,9 +34,9 @@ else()
         CACHE STRING "Current library implements the message handler for pw_log_string"
     )
 
-    list(APPEND source_list ${CMAKE_CURRENT_SOURCE_DIR}/basic_log_to_stdout.cc)
+    list(APPEND SOURCE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/BasicLogToStdout.cpp)
 endif()
 
-target_sources(${COMMONS_LOGGING_LIBRARY_NAME} PRIVATE ${source_list})
+target_sources(${COMMONS_LOGGING_LIBRARY_NAME} PRIVATE ${SOURCE_LIST})
 
-target_link_libraries(${COMMONS_LOGGING_LIBRARY_NAME} PUBLIC ${link_libs})
+target_link_libraries(${COMMONS_LOGGING_LIBRARY_NAME} PUBLIC ${LINK_LIBS})
