@@ -4,6 +4,12 @@
 # Author: Manoj Kumar Paladugu <paladugumanojkumar@gmail.com>
 #
 
+# Add the macro as a preprocessor definition
+target_compile_definitions(${COMMONS_LOGGING_LIBRARY_NAME}
+    PRIVATE
+        CONFIG_LIB_COMMONS_LOGGING_MAX_STRING_LENGTH=${CONFIG_LIB_COMMONS_LOGGING_MAX_STRING_LENGTH}
+)
+
 set(SOURCE_LIST)
 set(LINK_LIBS pw_log)
 
@@ -47,18 +53,3 @@ endif()
 target_sources(${COMMONS_LOGGING_LIBRARY_NAME} PRIVATE ${SOURCE_LIST})
 
 target_link_libraries(${COMMONS_LOGGING_LIBRARY_NAME} PUBLIC ${LINK_LIBS})
-
-
-# Fetch Pigweed library
-if (NOT DEFINED THIRD_PARTY_DIR)
-    message(FATAL_ERROR "THIRD_PARTY_DIR is not defined. Please set it to the path where third-party libraries need to be fetched.")
-endif()
-
-include(FetchContent)
-FetchContent_Declare(
-    pigweed
-    SYSTEM SOURCE_DIR "${THIRD_PARTY_DIR}/pigweed"
-    URL https://pigweed.googlesource.com/pigweed/pigweed/+archive/90d1391ff0c2fcb4717dc578bceccb2ec38643b8.tar.gz
-    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-)
-FetchContent_MakeAvailable(pigweed)

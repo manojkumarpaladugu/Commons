@@ -6,7 +6,7 @@
 
 #include "CommonTypes.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include <pw_log_string/handler.h>
 
 /**
@@ -36,6 +36,7 @@ void pw_log_string_HandleMessageVaList(int level,
     UNUSED(file_name);
     UNUSED(line_number);
     ASSERT(message != NULL);
+
     vfprintf(stdout, message, args);
     fflush(stdout);
 }

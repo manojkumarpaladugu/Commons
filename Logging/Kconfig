@@ -16,3 +16,11 @@ config LIB_COMMONS_TOKENIZED_LOGGING
   default n
   help
     This option enables string tokenization mode in commons logging library.
+
+config LIB_COMMONS_LOGGING_MAX_STRING_LENGTH
+  int "Maximum string length for logging"
+  default 128
+  range 64 256
+  help
+    This option sets the maximum string length for logging messages.
+    The value must be between 64 and 256 characters.

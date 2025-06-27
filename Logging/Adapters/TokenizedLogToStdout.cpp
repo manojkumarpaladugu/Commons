@@ -6,7 +6,7 @@
 
 #include "CommonTypes.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include <pw_log_tokenized/handler.h>
 #include <pw_log_tokenized/metadata.h>
 

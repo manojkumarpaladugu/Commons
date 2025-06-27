@@ -17,12 +17,12 @@ The Commons module is a collection of shared functionality or utilities, likely 
       remote: github
       repo-path: manojkumarpaladugu/Commons
       revision: main
-      path: Modules/Commons
+      path: modules/lib/Commons
     - name: pigweed
       remote: github
       repo-path: google/pigweed
       revision: 90d1391ff0c2fcb4717dc578bceccb2ec38643b8 # Latest as of Apr 5, 2025
-      path: ThirdParty/pigweed
+      path: third_party/pigweed
 ```
 2. Enable logging module in application's prj.conf file
 ```
