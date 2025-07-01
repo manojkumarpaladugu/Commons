@@ -20,5 +20,7 @@ if(CONFIG_LIB_COMMONS_LOGGING)
             ${CMAKE_CURRENT_SOURCE_DIR}/Include
     )
 
-    add_subdirectory(Adapters)
+    add_subdirectory(Producer)
+    add_subdirectory(Queue)
+    add_subdirectory(Dispatcher)
 endif()

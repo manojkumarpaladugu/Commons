@@ -17,6 +17,13 @@ config LIB_COMMONS_TOKENIZED_LOGGING
   help
     This option enables string tokenization mode in commons logging library.
 
+config LIB_COMMONS_LOGGING_ASYNC
+  bool "Enable asynchronous logging"
+  depends on LIB_COMMONS_LOGGING
+  default n
+  help
+    This option enables a queue for logging messages, allowing asynchronous logging.
+
 config LIB_COMMONS_LOGGING_MAX_STRING_LENGTH
   int "Maximum string length for logging"
   default 128
@@ -24,3 +31,9 @@ config LIB_COMMONS_LOGGING_MAX_STRING_LENGTH
   help
     This option sets the maximum string length for logging messages.
     The value must be between 64 and 256 characters.
+
+config LIB_COMMONS_LOGGING_MAX_CONSUMERS
+  int "Maximum number of consumers for logging"
+  default 1
+  help
+    This option sets the maximum number of consumers that can receive log messages.

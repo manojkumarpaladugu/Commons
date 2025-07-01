@@ -5,6 +5,11 @@
  */
 
 #include "CommonTypes.h"
+#ifdef CONFIG_LIB_COMMONS_LOGGING_ASYNC
+    #include "LogQueue.hpp"
+#else
+    #include "LogDispatcher.hpp"
+#endif
 
 #include <cstdio>
 #include <pw_log_string/handler.h>
@@ -37,6 +42,17 @@ void pw_log_string_HandleMessageVaList(int level,
     UNUSED(line_number);
     ASSERT(message != NULL);
 
-    vfprintf(stdout, message, args);
-    fflush(stdout);
+    // Format the log message into the buffer
+    constexpr size_t cBufferSize = CONFIG_LIB_COMMONS_LOGGING_MAX_STRING_LENGTH + 1;
+    uint8_t formattedMessage[cBufferSize];
+    size_t formattedMessageLength = vsnprintf(reinterpret_cast<char*>(formattedMessage), cBufferSize, message, args);
+    ASSERT(formattedMessageLength > 0 && formattedMessageLength < cBufferSize);
+
+#ifdef CONFIG_LIB_COMMONS_LOGGING_ASYNC
+    // Store the log message in the queue for asynchronous processing
+    LogQueue::PushLog(formattedMessage, formattedMessageLength, level);
+#else
+    // Send the log message directly to the consumer for synchronous processing
+    LogDispatcher::SendLog(formattedMessage, formattedMessageLength, level);
+#endif
 }

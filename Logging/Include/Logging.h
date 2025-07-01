@@ -7,7 +7,7 @@
 #pragma once
 
 // Define custom log levels
-#define LOG_LEVEL_NONE          0
+#define LOG_LEVEL_OMIT          0
 #define LOG_LEVEL_DEBUG         1
 #define LOG_LEVEL_INFO          2
 #define LOG_LEVEL_WARN          3
@@ -37,12 +37,12 @@
 #endif
 
 // Must be included after the module name, log level and log format definitions
-#include "PigweedLogging.h"
+#include "LoggingBackend.h"
 
 #define LOG(level, fmt, ...)               \
     do {                                   \
         COMPILE_ASSERT(                    \
-            (level == LOG_LEVEL_NONE)  ||  \
+            (level == LOG_LEVEL_OMIT)  ||  \
             (level == LOG_LEVEL_DEBUG) ||  \
             (level == LOG_LEVEL_INFO)  ||  \
             (level == LOG_LEVEL_WARN)  ||  \
@@ -51,7 +51,7 @@
             "Invalid log level: " #level); \
         switch(level)                      \
         {                                  \
-            case LOG_LEVEL_NONE:           \
+            case LOG_LEVEL_OMIT:           \
                 break;                     \
             case LOG_LEVEL_DEBUG:          \
                 LOG_MESSAGE(level, LOG_LEVEL_DEBUG_STR, fmt, ##__VA_ARGS__); \
@@ -74,6 +74,7 @@
     } while (false)
 
 // Interface macros for logging at different levels
+#define LOG_OMIT(fmt, ...)      LOG(LOG_LEVEL_OMIT, fmt, ##__VA_ARGS__)
 #define LOG_DEBUG(fmt, ...)     LOG(LOG_LEVEL_DEBUG, fmt, ##__VA_ARGS__)
 #define LOG_INFO(fmt, ...)      LOG(LOG_LEVEL_INFO, fmt, ##__VA_ARGS__)
 #define LOG_WARN(fmt, ...)      LOG(LOG_LEVEL_WARN, fmt, ##__VA_ARGS__)

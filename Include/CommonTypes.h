@@ -24,5 +24,6 @@
 
 /// @brief Assert macro
 #ifndef ASSERT
+// TODO: Replace with a proper assert implementation
 #define ASSERT(condition) do { if (!(condition)) { while (1); } } while (0)
 #endif

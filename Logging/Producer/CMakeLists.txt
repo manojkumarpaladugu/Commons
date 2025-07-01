@@ -10,8 +10,8 @@ target_compile_definitions(${COMMONS_LOGGING_LIBRARY_NAME}
         CONFIG_LIB_COMMONS_LOGGING_MAX_STRING_LENGTH=${CONFIG_LIB_COMMONS_LOGGING_MAX_STRING_LENGTH}
 )
 
-set(SOURCE_LIST)
-set(LINK_LIBS pw_log)
+set(PIGWEED_BACKEND_SRC_LIST)
+set(PIGWEED_BACKEND_LINK_LIBS pw_log)
 
 # Configure pigweed's backend before fetching pigweed library
 if (CONFIG_LIB_COMMONS_TOKENIZED_LOGGING)
@@ -35,7 +35,7 @@ if (CONFIG_LIB_COMMONS_TOKENIZED_LOGGING)
         CACHE STRING "Use the print and abort backend for pw_assert.check"
     )
 
-    list(APPEND SOURCE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/TokenizedLogToStdout.cpp)
+    list(APPEND PIGWEED_BACKEND_SRC_LIST ${CMAKE_CURRENT_SOURCE_DIR}/TokenizedLogProducer.cpp)
 else()
     set(pw_log_BACKEND
         pw_log_string
@@ -47,9 +47,9 @@ else()
         CACHE STRING "Current library implements the message handler for pw_log_string"
     )
 
-    list(APPEND SOURCE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/BasicLogToStdout.cpp)
+    list(APPEND PIGWEED_BACKEND_SRC_LIST ${CMAKE_CURRENT_SOURCE_DIR}/BasicLogProducer.cpp)
 endif()
 
-target_sources(${COMMONS_LOGGING_LIBRARY_NAME} PRIVATE ${SOURCE_LIST})
+target_sources(${COMMONS_LOGGING_LIBRARY_NAME} PRIVATE ${PIGWEED_BACKEND_SRC_LIST})
 
-target_link_libraries(${COMMONS_LOGGING_LIBRARY_NAME} PUBLIC ${LINK_LIBS})
+target_link_libraries(${COMMONS_LOGGING_LIBRARY_NAME} PUBLIC ${PIGWEED_BACKEND_LINK_LIBS})
