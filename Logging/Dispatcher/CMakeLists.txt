@@ -6,7 +6,7 @@
 
 target_include_directories(${COMMONS_LOGGING_LIBRARY_NAME}
     PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/Include
 )
 
 target_sources(${COMMONS_LOGGING_LIBRARY_NAME}
