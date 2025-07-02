@@ -8,8 +8,8 @@
 // Header includes
 // ----------------------------------------------------------------------------
 
-#include "CommonTypes.h"
 #include "LogQueue.hpp"
+#include "Assert.h"
 
 // ----------------------------------------------------------------------------
 // Datatype definitions

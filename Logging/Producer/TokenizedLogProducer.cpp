@@ -5,6 +5,7 @@
  */
 
 #include "CommonTypes.h"
+#include "Assert.h"
 
 #include <cstdio>
 #include <pw_log_tokenized/handler.h>

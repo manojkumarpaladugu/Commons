@@ -21,9 +21,3 @@
 
 /// @brief To mark a variable as unused. This is useful to avoid compiler warnings about unused variables.
 #define UNUSED(expr) do { (void)(expr); } while (0)
-
-/// @brief Assert macro
-#ifndef ASSERT
-// TODO: Replace with a proper assert implementation
-#define ASSERT(condition) do { if (!(condition)) { while (1); } } while (0)
-#endif

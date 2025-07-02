@@ -5,6 +5,7 @@
  */
 
 #include "CommonTypes.h"
+#include "Assert.h"
 #ifdef CONFIG_LIB_COMMONS_LOGGING_ASYNC
     #include "LogQueue.hpp"
 #else
