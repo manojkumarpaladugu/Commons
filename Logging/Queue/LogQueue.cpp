@@ -27,6 +27,7 @@ typedef struct __attribute__((packed)) LogMetadata
 // ----------------------------------------------------------------------------
 
 LogQueue_t LogQueue::mLogQueue;
+uint8_t LogQueue::messageBuffer[CONFIG_LIB_COMMONS_LOGGING_MAX_STRING_LENGTH + 1];
 
 // ----------------------------------------------------------------------------
 // Public functions
@@ -94,10 +95,8 @@ void LogQueue::PushLog(const uint8_t* pMessage, size_t messageLength, int level)
     }
 }
 
-void LogQueue::PullLog(uint8_t* pMessage, size_t &messageLength, int &level)
+void LogQueue::PullLog(uint8_t* &pMessage, size_t &messageLength, int &level)
 {
-    ASSERT(pMessage != NULL);
-
     uint8_t* pQueueBuffer = static_cast<uint8_t*>(mLogQueue.pBuffer);
     size_t queueSize = mLogQueue.size;
     size_t &head = mLogQueue.head;
@@ -143,7 +142,10 @@ void LogQueue::PullLog(uint8_t* pMessage, size_t &messageLength, int &level)
     // Read the log message from the transport buffer
     for (size_t i = 0; i < messageLength; ++i)
     {
-        pMessage[i] = static_cast<uint8_t*>(pQueueBuffer)[head];
+        messageBuffer[i] = static_cast<uint8_t*>(pQueueBuffer)[head];
         head = (head + 1) % queueSize;      // Wrap around if needed
     }
+
+    // Set the output pointer to the message buffer
+    pMessage = messageBuffer;
 }

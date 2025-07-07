@@ -58,12 +58,14 @@ public:
      *
      * This method retrieves a log message from the log queue.
      *
-     * @param[in] pMessage A pointer to the buffer where the log message will be retrieved.
+     * @param[out] pMessage A pointer to the retrieved log message.
      * @param[out] messageLength The length of the retrieved log message.
      * @param[out] level The log level of the retrieved message.
      */
-    static void PullLog(uint8_t* pMessage, size_t &messageLength, int &level);
+    static void PullLog(uint8_t* &pMessage, size_t &messageLength, int &level);
 
 private:
-    static LogQueue_t     mLogQueue;           // Queue to store log messages
+
+    static LogQueue_t mLogQueue;                                 // Queue to store log messages
+    static uint8_t    messageBuffer[CONFIG_LIB_COMMONS_LOGGING_MAX_STRING_LENGTH + 1];    // Buffer to hold the log message
 };

@@ -22,6 +22,7 @@ if(CONFIG_LIB_COMMONS_LOGGING)
 
     add_subdirectory(Producer)
     add_subdirectory(Queue)
-    add_subdirectory(Dispatcher)
+    add_subdirectory(Consumer)
     add_subdirectory(Assert)
+    add_subdirectory(Core)
 endif()

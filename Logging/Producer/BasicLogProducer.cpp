@@ -6,18 +6,14 @@
 
 #include "CommonTypes.h"
 #include "Assert.h"
-#ifdef CONFIG_LIB_COMMONS_LOGGING_ASYNC
-    #include "LogQueue.hpp"
-#else
-    #include "LogDispatcher.hpp"
-#endif
+#include "LogCore.hpp"
 
 #include <cstdio>
 #include <pw_log_string/handler.h>
 
 /**
  * @brief Implementation of the log message handler used as backend for pw_log_string.handler.
- * 
+ *
  * This function prints the log message to stdout. It is called by the pigweed logging.
  *
  * @param[in] level The log level of the message.
@@ -49,11 +45,6 @@ void pw_log_string_HandleMessageVaList(int level,
     size_t formattedMessageLength = vsnprintf(reinterpret_cast<char*>(formattedMessage), cBufferSize, message, args);
     ASSERT(formattedMessageLength > 0 && formattedMessageLength < cBufferSize);
 
-#ifdef CONFIG_LIB_COMMONS_LOGGING_ASYNC
-    // Store the log message in the queue for asynchronous processing
-    LogQueue::PushLog(formattedMessage, formattedMessageLength, level);
-#else
-    // Send the log message directly to the consumer for synchronous processing
-    LogDispatcher::SendLog(formattedMessage, formattedMessageLength, level);
-#endif
+    // Send the formatted log message
+    LogCore::HandleLogMessage(formattedMessage, formattedMessageLength, level);
 }

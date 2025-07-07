@@ -31,9 +31,8 @@ public:
      * This function is called to process a log message. The implementation
      * should handle the log message appropriately
      *
-     * @param[in] message Pointer to the log message.
+     * @param[in] pMessage Pointer to the log message.
      * @param[in] length Length of the log message.
-     * @param[in] level Log level of the message.
      */
-    virtual void ProcessLog(const uint8_t* message, size_t length, int level) = 0;
+    virtual void ProcessLogMessage(const uint8_t* pMessage, size_t length) = 0;
 };

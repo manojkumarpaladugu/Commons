@@ -6,15 +6,15 @@
 
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // ----------------------------------------------------------------------------
 // Header includes
 // ----------------------------------------------------------------------------
 
-#include <stdint.h>
+#include <cstdint>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // ----------------------------------------------------------------------------
 // Macro definitions
@@ -27,7 +27,7 @@ extern "C" {
  * @param[in] line The line number where the assertion failed.
  * @param[in] caller The address of the caller function.
  */
-void Assert_HandleAssert(const char* file, int line, uintptr_t caller);
+void Assert_HandleAssert(const char* pFile, int line, uintptr_t caller);
 
 /// @brief Assert macro
 #define ASSERT(condition)   \

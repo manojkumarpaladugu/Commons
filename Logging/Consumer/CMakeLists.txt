@@ -11,5 +11,5 @@ target_include_directories(${COMMONS_LOGGING_LIBRARY_NAME}
 
 target_sources(${COMMONS_LOGGING_LIBRARY_NAME}
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/LogDispatcher.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/LogConsumer.cpp
 )
