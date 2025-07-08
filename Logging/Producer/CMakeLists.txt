@@ -4,14 +4,18 @@
 # Author: Manoj Kumar Paladugu <paladugumanojkumar@gmail.com>
 #
 
-# Add the macro as a preprocessor definition
+if(NOT DEFINED CONFIG_LIB_COMMONS_LOGGING_MAX_STRING_LENGTH)
+    message(FATAL_ERROR "CONFIG_LIB_COMMONS_LOGGING_MAX_STRING_LENGTH is not defined.\
+                         Please set the max string length of each log message.")
+endif()
+
 target_compile_definitions(${COMMONS_LOGGING_LIBRARY_NAME}
     PRIVATE
         CONFIG_LIB_COMMONS_LOGGING_MAX_STRING_LENGTH=${CONFIG_LIB_COMMONS_LOGGING_MAX_STRING_LENGTH}
 )
 
-set(PRODUCER_SRC_LIST)
-set(PRODUCER_LINK_LIBS pw_log)
+set(LOG_PRODUCER_SRC_LIST)
+set(LOG_PRODUCER_LINK_LIBS pw_log)
 
 # Configure pigweed's backend before fetching pigweed library
 if (CONFIG_LIB_COMMONS_TOKENIZED_LOGGING)
@@ -35,7 +39,7 @@ if (CONFIG_LIB_COMMONS_TOKENIZED_LOGGING)
         CACHE STRING "Use the print and abort backend for pw_assert.check"
     )
 
-    list(APPEND PRODUCER_SRC_LIST ${CMAKE_CURRENT_SOURCE_DIR}/TokenizedLogProducer.cpp)
+    list(APPEND LOG_PRODUCER_SRC_LIST ${CMAKE_CURRENT_SOURCE_DIR}/TokenizedLogProducer.cpp)
 else()
     set(pw_log_BACKEND
         pw_log_string
@@ -47,9 +51,22 @@ else()
         CACHE STRING "Current library implements the message handler for pw_log_string"
     )
 
-    list(APPEND PRODUCER_SRC_LIST ${CMAKE_CURRENT_SOURCE_DIR}/BasicLogProducer.cpp)
+    list(APPEND LOG_PRODUCER_SRC_LIST ${CMAKE_CURRENT_SOURCE_DIR}/BasicLogProducer.cpp)
 endif()
 
-target_sources(${COMMONS_LOGGING_LIBRARY_NAME} PRIVATE ${PRODUCER_SRC_LIST})
+include(${CMAKE_CURRENT_SOURCE_DIR}/FetchPigweed.cmake)
 
-target_link_libraries(${COMMONS_LOGGING_LIBRARY_NAME} PUBLIC ${PRODUCER_LINK_LIBS})
+target_include_directories(${COMMONS_LOGGING_LIBRARY_NAME}
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/Include
+)
+
+target_sources(${COMMONS_LOGGING_LIBRARY_NAME}
+    PRIVATE
+        ${LOG_PRODUCER_SRC_LIST}
+)
+
+target_link_libraries(${COMMONS_LOGGING_LIBRARY_NAME}
+    PUBLIC
+        ${LOG_PRODUCER_LINK_LIBS}
+)

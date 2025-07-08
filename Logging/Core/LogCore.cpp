@@ -11,9 +11,9 @@
 #include "LogCore.hpp"
 #ifdef CONFIG_LIB_COMMONS_LOGGING_ASYNC
     #include "LogQueue.hpp"
+    #include "LogThread.hpp"
 #endif
 #include "LogConsumer.hpp"
-#include "LogThread.hpp"
 
 // ----------------------------------------------------------------------------
 // Public functions

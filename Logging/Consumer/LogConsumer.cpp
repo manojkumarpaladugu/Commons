@@ -8,7 +8,7 @@
 // Header includes
 // ----------------------------------------------------------------------------
 
-#include "Assert.h"
+#include "CommonTypes.h"
 #include "LogConsumer.hpp"
 #ifdef CONFIG_LIB_COMMONS_LOGGING_ASYNC
     #include "LogQueue.hpp"
@@ -39,6 +39,8 @@ void LogConsumer::RegisterConsumer(IConsumer &consumer)
 
 void LogConsumer::SendLogMessage(const uint8_t* pMessage, size_t length, int level)
 {
+    UNUSED(level);
+
     // Send the log message to all registered consumers
     for (size_t i = 0; i < CONFIG_LIB_COMMONS_LOGGING_MAX_CONSUMERS; ++i)
     {
