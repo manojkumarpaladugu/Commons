@@ -19,8 +19,9 @@
 // Public functions
 // ----------------------------------------------------------------------------
 
-void LogCore::RegisterConsumer(IConsumer &consumer)
+void LogCore::RegisterConsumer(uint8_t id, IConsumer &consumer)
 {
+    consumer.SetConsumerId(id);
     LogConsumer::RegisterConsumer(consumer);
 }
 

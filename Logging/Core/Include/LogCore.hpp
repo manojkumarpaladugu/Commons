@@ -20,16 +20,17 @@ public:
     /**
      * @brief Registers a consumer to receive log messages.
      *
-     * @param consumer Reference to the consumer that will handle log messages.
+     * @param[in] id Unique identifier for the consumer.
+     * @param[in] consumer Reference to the consumer that will handle log messages.
      */
-    static void RegisterConsumer(IConsumer &consumer);
+    static void RegisterConsumer(uint8_t id, IConsumer &consumer);
 
 #ifdef CONFIG_LIB_COMMONS_LOGGING_ASYNC
     /**
      * @brief Initializes the log queue with the provided buffer and size.
      *
-     * @param pBuffer Pointer to the buffer used for the log queue.
-     * @param bufferSize Size of the buffer in bytes.
+     * @param[in] pBuffer Pointer to the buffer used for the log queue.
+     * @param[in] bufferSize Size of the buffer in bytes.
      */
     static void InitializeQueue(void* pBuffer, size_t bufferSize);
 

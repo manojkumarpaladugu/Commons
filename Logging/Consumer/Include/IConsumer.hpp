@@ -20,6 +20,7 @@
 class IConsumer
 {
 public:
+
     /**
      * @brief Virtual destructor to ensure proper cleanup of derived classes.
      */
@@ -35,4 +36,13 @@ public:
      * @param[in] length Length of the log message.
      */
     virtual void ProcessLogMessage(const uint8_t* pMessage, size_t length) = 0;
+
+    void SetConsumerId(uint8_t id)
+    {
+        mId = id; // Set the unique identifier for the consumer
+    }
+
+private:
+
+    uint8_t     mId;    // Unique identifier for the consumer
 };

@@ -6,6 +6,13 @@
 
 #pragma once
 
+/*
+NOTE: Before including this header file, the following macros must be defined by the application:
+- LOG_MODULE_NAME: A string representing the name of the module.
+- MODULE_LOG_LEVEL: An integer representing the default log level for the module.
+- LOG_LINE_ENDING: A string representing the line ending to be used in log messages (default is "\n").
+*/
+
 // Define custom log levels
 #define LOG_LEVEL_OMIT          0
 #define LOG_LEVEL_DEBUG         1
@@ -31,9 +38,14 @@
 #define MODULE_LOG_LEVEL        LOG_LEVEL_DEBUG
 #endif
 
+// Set line ending character(s)
+#ifndef LOG_LINE_ENDING
+#define LOG_LINE_ENDING         "\n"
+#endif
+
 // Set default log message format if not defined by application
 #ifndef LOG_FORMAT
-#define LOG_FORMAT(level, module, file, line, message) level " " module "|" file ":" line " - " message "\n"
+#define LOG_FORMAT(level, module, file, line, message) level " " module "|" file ":" line " - " message LOG_LINE_ENDING
 #endif
 
 // Must be included after the module name, log level and log format definitions
