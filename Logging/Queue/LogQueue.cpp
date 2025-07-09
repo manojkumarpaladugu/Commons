@@ -27,7 +27,7 @@ typedef struct __attribute__((packed)) LogMetadata
 // ----------------------------------------------------------------------------
 
 LogQueue_t LogQueue::mLogQueue;
-uint8_t LogQueue::messageBuffer[CONFIG_LIB_COMMONS_LOGGING_MAX_STRING_LENGTH + 1];
+uint8_t LogQueue::messageBuffer[cLogMessageBuffer + 1];
 
 // ----------------------------------------------------------------------------
 // Public functions

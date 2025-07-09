@@ -17,14 +17,19 @@
 // Class definition
 // ----------------------------------------------------------------------------
 
-class IConsumer
+class LogToOutput
 {
 public:
 
     /**
      * @brief Virtual destructor to ensure proper cleanup of derived classes.
      */
-    virtual ~IConsumer() = default;
+    virtual ~LogToOutput() = default;
+
+    /**
+     * @brief Initialize the log consumer.
+     */
+    virtual void Initialize() = 0;
 
     /**
      * @brief Process a log message.
@@ -37,9 +42,9 @@ public:
      */
     virtual void ProcessLogMessage(const uint8_t* pMessage, size_t length) = 0;
 
-    void SetConsumerId(uint8_t id)
+    void SetId(uint8_t id)
     {
-        mId = id; // Set the unique identifier for the consumer
+        mId = id;
     }
 
 private:

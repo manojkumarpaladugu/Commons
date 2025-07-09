@@ -8,7 +8,7 @@
 // Header includes
 // ----------------------------------------------------------------------------
 
-#include "IConsumer.hpp"
+#include "LogToOutput.hpp"
 
 // ----------------------------------------------------------------------------
 // Class definition
@@ -23,21 +23,16 @@ public:
      * @param[in] id Unique identifier for the consumer.
      * @param[in] consumer Reference to the consumer that will handle log messages.
      */
-    static void RegisterConsumer(uint8_t id, IConsumer &consumer);
+    static void RegisterConsumer(uint8_t id, LogToOutput &consumer);
 
-#ifdef CONFIG_LIB_COMMONS_LOGGING_ASYNC
+#if CONFIG_LIB_COMMONS_LOGGING_ASYNC
     /**
-     * @brief Initializes the log queue with the provided buffer and size.
+     * @brief Initializes the log queue and start the log thread.
      *
      * @param[in] pBuffer Pointer to the buffer used for the log queue.
      * @param[in] bufferSize Size of the buffer in bytes.
      */
     static void InitializeQueue(void* pBuffer, size_t bufferSize);
-
-    /**
-     * @brief Starts the log dispatcher thread for asynchronous logging.
-     */
-    static void Start();
 #endif
 
     /**
@@ -56,7 +51,7 @@ public:
 
 private:
 
-#ifdef CONFIG_LIB_COMMONS_LOGGING_ASYNC
+#if CONFIG_LIB_COMMONS_LOGGING_ASYNC
     /**
      * @brief Dispatches one log message at a time to registered consumers.
      *

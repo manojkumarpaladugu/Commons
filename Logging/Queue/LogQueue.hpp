@@ -66,6 +66,7 @@ public:
 
 private:
 
-    static LogQueue_t mLogQueue;                                 // Queue to store log messages
-    static uint8_t    messageBuffer[CONFIG_LIB_COMMONS_LOGGING_MAX_STRING_LENGTH + 1];    // Buffer to hold the log message
+    static LogQueue_t          mLogQueue;                                                   // Queue to store log messages
+    inline static const size_t cLogMessageBuffer = CONFIG_LIB_COMMONS_LOGGING_BUFFER_SIZE;  // Size of the log message buffer
+    static uint8_t             messageBuffer[cLogMessageBuffer + 1];                        // Buffer to hold the log message
 };

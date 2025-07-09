@@ -6,8 +6,8 @@
 
 #include "CommonTypes.h"
 #include "Assert.h"
+#include "LogCore.hpp"
 
-#include <cstdio>
 #include <pw_log_tokenized/handler.h>
 #include <pw_log_tokenized/metadata.h>
 
@@ -27,6 +27,7 @@ void pw_log_tokenized_HandleLog(uint32_t metadata,
 {
     ASSERT(encoded_message != nullptr);
     pw::log_tokenized::Metadata log_metadata(metadata);
-    fwrite(encoded_message, sizeof(uint8_t), size_bytes, stdout);
-    fflush(stdout);
+
+    // Send the encoded log message
+    LogCore::HandleLogMessage(encoded_message, size_bytes, log_metadata.level());
 }

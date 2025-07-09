@@ -10,7 +10,7 @@
 
 #include "CommonTypes.h"
 #include "LogConsumer.hpp"
-#ifdef CONFIG_LIB_COMMONS_LOGGING_ASYNC
+#if CONFIG_LIB_COMMONS_LOGGING_ASYNC
     #include "LogQueue.hpp"
 #endif
 
@@ -19,19 +19,19 @@
 // ----------------------------------------------------------------------------
 
 // List of registered consumers
-IConsumer* LogConsumer::mIConsumers[CONFIG_LIB_COMMONS_LOGGING_MAX_CONSUMERS];
+LogToOutput* LogConsumer::mConsumers[CONFIG_LIB_COMMONS_LOGGING_MAX_CONSUMERS];
 
 // ----------------------------------------------------------------------------
 // Public functions
 // ----------------------------------------------------------------------------
 
-void LogConsumer::RegisterConsumer(IConsumer &consumer)
+void LogConsumer::RegisterConsumer(LogToOutput &consumer)
 {
     for (size_t i = 0; i < CONFIG_LIB_COMMONS_LOGGING_MAX_CONSUMERS; ++i)
     {
-        if (mIConsumers[i] == nullptr)
+        if (mConsumers[i] == nullptr)
         {
-            mIConsumers[i] = &consumer;
+            mConsumers[i] = &consumer;
             return; // Consumer registered successfully
         }
     }
@@ -44,7 +44,7 @@ void LogConsumer::SendLogMessage(const uint8_t* pMessage, size_t length, int lev
     // Send the log message to all registered consumers
     for (size_t i = 0; i < CONFIG_LIB_COMMONS_LOGGING_MAX_CONSUMERS; ++i)
     {
-        IConsumer* pConsumer = mIConsumers[i];
+        LogToOutput* pConsumer = mConsumers[i];
         if (pConsumer != nullptr)
         {
             pConsumer->ProcessLogMessage(pMessage, length);

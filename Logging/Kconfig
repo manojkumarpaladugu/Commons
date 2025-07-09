@@ -24,12 +24,12 @@ config LIB_COMMONS_LOGGING_ASYNC
   help
     This option enables a queue for logging messages, allowing asynchronous logging.
 
-config LIB_COMMONS_LOGGING_MAX_STRING_LENGTH
-  int "Maximum string length for logging"
+config LIB_COMMONS_LOGGING_BUFFER_SIZE
+  int "Maximum buffer size for logging messages"
   default 128
   range 64 256
   help
-    This option sets the maximum string length for logging messages.
+    This option sets the maximum size of the buffer used for logging messages.
     The value must be between 64 and 256 characters.
 
 config LIB_COMMONS_LOGGING_MAX_CONSUMERS

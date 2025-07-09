@@ -9,7 +9,7 @@
 // ----------------------------------------------------------------------------
 
 #include "LogCore.hpp"
-#ifdef CONFIG_LIB_COMMONS_LOGGING_ASYNC
+#if CONFIG_LIB_COMMONS_LOGGING_ASYNC
     #include "LogQueue.hpp"
     #include "LogThread.hpp"
 #endif
@@ -19,20 +19,17 @@
 // Public functions
 // ----------------------------------------------------------------------------
 
-void LogCore::RegisterConsumer(uint8_t id, IConsumer &consumer)
+void LogCore::RegisterConsumer(uint8_t id, LogToOutput &consumer)
 {
-    consumer.SetConsumerId(id);
+    consumer.SetId(id);
+    consumer.Initialize();
     LogConsumer::RegisterConsumer(consumer);
 }
 
-#ifdef CONFIG_LIB_COMMONS_LOGGING_ASYNC
+#if CONFIG_LIB_COMMONS_LOGGING_ASYNC
 void LogCore::InitializeQueue(void* pBuffer, size_t bufferSize)
 {
     LogQueue::Initialize(pBuffer, bufferSize);
-}
-
-void LogCore::Start()
-{
     LogThread::CreateThread(LogCore::DispatchLogMessage);
 }
 #endif
@@ -42,7 +39,7 @@ void LogCore::EnablePanicMode()
     mPanicModeEnabled = true;
 
     // Flush all the queued log messages immediately
-#ifdef CONFIG_LIB_COMMONS_LOGGING_ASYNC
+#if CONFIG_LIB_COMMONS_LOGGING_ASYNC
     LogCore::Flushlogs();
 #endif
 }
@@ -51,7 +48,7 @@ void LogCore::HandleLogMessage(const uint8_t* pMessage, size_t length, int level
 {
     bool synchronousLogging = true;
 
-#ifdef CONFIG_LIB_COMMONS_LOGGING_ASYNC
+#if CONFIG_LIB_COMMONS_LOGGING_ASYNC
     synchronousLogging = false;
 #endif
 
@@ -62,7 +59,7 @@ void LogCore::HandleLogMessage(const uint8_t* pMessage, size_t length, int level
     }
     else
     {
-    #ifdef CONFIG_LIB_COMMONS_LOGGING_ASYNC
+    #if CONFIG_LIB_COMMONS_LOGGING_ASYNC
         // In normal mode, we can queue the log message for asynchronous processing
         LogQueue::PushLog(pMessage, length, level);
     #endif
@@ -73,7 +70,7 @@ void LogCore::HandleLogMessage(const uint8_t* pMessage, size_t length, int level
 // Private functions
 // ----------------------------------------------------------------------------
 
-#ifdef CONFIG_LIB_COMMONS_LOGGING_ASYNC
+#if CONFIG_LIB_COMMONS_LOGGING_ASYNC
 bool LogCore::DispatchLogMessage()
 {
     bool messageDispatched = false;

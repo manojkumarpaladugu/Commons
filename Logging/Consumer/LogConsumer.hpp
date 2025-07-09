@@ -10,7 +10,7 @@
 // Header includes
 // ----------------------------------------------------------------------------
 
-#include "IConsumer.hpp"
+#include "LogToOutput.hpp"
 
 // ----------------------------------------------------------------------------
 // Class definition
@@ -25,7 +25,7 @@ public:
      *
      * @param[in] consumer Reference to the consumer object that will handle log messages.
      */
-    static void RegisterConsumer(IConsumer &consumer);
+    static void RegisterConsumer(LogToOutput &consumer);
 
     /**
      * @brief Send log message to all the registered consumers.
@@ -40,5 +40,5 @@ public:
 
 private:
 
-    static IConsumer* mIConsumers[CONFIG_LIB_COMMONS_LOGGING_MAX_CONSUMERS];           // Array of registered consumers
+    static LogToOutput* mConsumers[CONFIG_LIB_COMMONS_LOGGING_MAX_CONSUMERS];           // Array of registered consumers
 };
