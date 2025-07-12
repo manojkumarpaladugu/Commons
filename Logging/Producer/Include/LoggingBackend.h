@@ -23,7 +23,7 @@
     (level) == LOG_LEVEL_INFO ? PW_LOG_LEVEL_INFO :    \
     (level) == LOG_LEVEL_WARN ? PW_LOG_LEVEL_WARN :    \
     (level) == LOG_LEVEL_ERROR ? PW_LOG_LEVEL_ERROR :  \
-    (level) == LOG_LEVEL_CRITICAL ? PW_LOG_LEVEL_CRITICAL : PW_LOG_LEVEL_INFO)
+    (level) == LOG_LEVEL_CRITICAL ? PW_LOG_LEVEL_CRITICAL : PW_LOG_LEVEL_DEBUG)
 
 // Convert the line number to string
 #define LINE_STRING                 STRINGIZE(__LINE__)

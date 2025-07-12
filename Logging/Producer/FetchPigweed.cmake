@@ -33,3 +33,6 @@ else()
 endif()
 
 FetchContent_MakeAvailable(pigweed)
+
+# Propagate the compiler options to libraries
+target_link_libraries(pw_build INTERFACE ${COMMONS_LIBRARY_NAME})

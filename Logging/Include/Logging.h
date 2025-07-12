@@ -38,14 +38,9 @@ NOTE: Before including this header file, the following macros must be defined by
 #define MODULE_LOG_LEVEL        LOG_LEVEL_DEBUG
 #endif
 
-// Set line ending character(s)
-#ifndef LOG_LINE_ENDING
-#define LOG_LINE_ENDING         "\n"
-#endif
-
 // Set default log message format if not defined by application
 #ifndef LOG_FORMAT
-#define LOG_FORMAT(level, module, file, line, message) level " " module "|" file ":" line " - " message LOG_LINE_ENDING
+#define LOG_FORMAT(level, module, file, line, message) level " " module "|" file ":" line " - " message "\n"
 #endif
 
 // Must be included after the module name, log level and log format definitions

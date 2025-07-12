@@ -7,6 +7,75 @@ the output (eg: UART, JTAG, Memory, etc...) it needs.
 It uses [Google's pigweed](https://pigweed.dev/) library, specifically pw_log
 and pw_tokenizer for implementing the backend functionality.
 
+## Interface
+
+Logging levels are used to filter and manage the vast amount of information
+that a running program can produce.
+
+* LOG_LEVEL_OMIT: For logs that need not be outputted.
+* LOG_LEVEL_DEBUG: Messages at this level are intended for developers during the
+                   development phase.
+* LOG_LEVEL_INFO: Messages at this level describe the progress of the application
+                  at a high level.
+* LOG_LEVEL_WARN: Messages at this level are "heads-up" for something that
+                  might need attention.
+* LOG_LEVEL_ERROR: Messages at this level signifies a serious problem that has
+                   occurred and prevents a specific operation or part of the
+                   application from functioning correctly.
+* LOG_LEVEL_CRITICAL: This is the highest level of severity, indicating a
+                      severe error that could lead to application instability,
+                      data loss, or the application crashing entirely.
+
+To use logging, the following macros need to be defined first.
+Then include the 'Logging.h' header file in source files.
+
+* LOG_MODULE_NAME: Defines the name of the module from which the logging
+                   messages are coming. `Default is 'MODULE'`.
+* MODULE_LOG_LEVEL: Defines the minimum log level for which logs from this
+                    source file are outputted. `Default is 'LOG_LEVEL_DEBUG'`.
+* LOG_FORMAT(level, module, file, line, message) - Defines the format of log
+        strings from this source file.
+        `Default is 'level " " module "|" file ":" line " - " message "\n"'`.
+
+The macros `LOG_MODULE_NAME` and `MODULE_LOG_LEVEL` can be defined per module
+or the entire application through CMake file.
+
+```cmake
+target_compile_definitions(<module or app>
+    <PRIVATE or PUBLIC>
+        LOG_MODULE_NAME="MY_MODULE"
+        MODULE_LOG_LEVEL=LOG_LEVEL_DEBUG
+)
+```
+
+Otherwise, they can be defined in source file before including the Logging.h.
+
+```c
+// filename: Main.cpp
+#define LOG_MODULE_NAME "main"
+#define MODULE_LOG_LEVEL LOG_LEVEL_DEBUG
+#define LOG_FORMAT(level, module, file, line, message) level " " module "|" file ":" line " - " message "\n"
+
+// Must be included only after defining the above macros
+#include "Logging.h"
+```
+
+As an example, the following code snippet shows the usage of different logging macros.
+
+```c
+// filename: Main.cpp
+int main(void)
+{
+    LOG_DEBUG("This is a debug message");
+    LOG_INFO("This is an info message");
+    LOG_WARN("This is a warning message");
+    LOG_ERROR("This is an error message");
+    LOG_CRITICAL("This is a critical message");
+    ASSERT(false);
+    return 0;
+}
+```
+
 ## Configuration
 
 This describes the configuration options for the Common Logging Library,
