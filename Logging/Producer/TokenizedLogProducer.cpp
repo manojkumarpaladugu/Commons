@@ -13,9 +13,9 @@
 
 /**
  * @brief Implementation of the log message handler used as backend for pw_log_tokenized.handler
- * 
+ *
  * This function prints the encoded message to stdout. It is called by the pigweed logging.
- * 
+ *
  * @param[in] metadata The metadata associated with the log message (level, line, flag and module).
  * @param[in] encoded_message The encoded log message.
  * @param[in] size_bytes The size of the encoded message in bytes.

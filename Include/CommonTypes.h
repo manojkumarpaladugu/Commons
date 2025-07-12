@@ -17,7 +17,7 @@
 
 /// @brief Stringize
 #define STRINGIZE(x) _STRINGIZE(x)                      ///< Macro for converting the argument value to string. Require indirection to stringize the value instead of the identifier.
-#define _STRINGIZE(x) #x                                ///< Macro for converting the argument value to string. Calling this directly will stringize the identifer, not the value.
+#define _STRINGIZE(x) #x                                ///< Macro for converting the argument value to string. Calling this directly will stringize the identifier, not the value.
 
 /// @brief To mark a variable as unused. This is useful to avoid compiler warnings about unused variables.
 #define UNUSED(expr) do { (void)(expr); } while (0)

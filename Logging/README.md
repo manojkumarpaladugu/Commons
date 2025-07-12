@@ -1,0 +1,207 @@
+# Logging
+
+The Logging library which is part of the large collection of Commons module
+provides an interface for the application to print string messages on whatever
+the output (eg: UART, JTAG, Memory, etc...) it needs.
+
+It uses [Google's pigweed](https://pigweed.dev/) library, specifically pw_log
+and pw_tokenizer for implementing the backend functionality.
+
+## Configuration
+
+This describes the configuration options for the Common Logging Library,
+typically set via a CMake or a Kconfig-like system. These options allow you to
+customize the behavior and features of the logging facility within your
+application or system.
+
+| Option Name | Type | Default | Dependencies | Description |
+|---|---|---|---|---|
+| `CONFIG_LIB_COMMONS_LOGGING` | `bool` | `n` | None | Enables or disables the entire common logging library. |
+| `CONFIG_LIB_COMMONS_LOGGING_TOKENIZED` | `bool` | `n` | `CONFIG_LIB_COMMONS_LOGGING` | Enables string tokenization mode for logging messages. When enabled, log messages are converted into numerical tokens, which can reduce memory footprint and improve logging performance, especially in resource-constrained environments. |
+| `CONFIG_LIB_COMMONS_LOGGING_ASYNC` | `bool` | `n` | `CONFIG_LIB_COMMONS_LOGGING` | Enables asynchronous logging. This option utilizes an internal queue to buffer log messages, allowing the logging operations to be non-blocking for the main application thread. A consumer thread pulls messages from the internal queue and forwards to all the registered consumers. |
+| `CONFIG_LIB_COMMONS_LOGGING_BUFFER_SIZE` | `int` | `128` | None | Sets the maximum size of the internal buffer used for storing logging messages. This is particularly relevant when asynchronous logging is enabled. The value must be between 64 and 256 characters. |
+| `CONFIG_LIB_COMMONS_LOGGING_MAX_CONSUMERS` | `int` | `1` | None | Defines the maximum number of consumer entities (e.g., threads or tasks) that can simultaneously process and output log messages to the different outputs (eg: Stdout, UART and Memory). |
+| `CONFIG_LIB_COMMONS_LOGGING_BASE64_ENCODING` | `bool` | `n` | `CONFIG_LIB_COMMONS_LOGGING_TOKENIZED` | Enables Base64 encoding for tokenized log messages. This is useful for ensuring that tokenized (potentially binary) log data can be safely transmitted or stored in systems that primarily handle text-based data. This option only takes effect if `CONFIG_LIB_COMMONS_LOGGING_TOKENIZED` is also enabled. |
+
+Set THIRD_PARTY_DIR variable to the path where third party libraries needs to
+be stored.
+
+```cmake
+set(THIRD_PARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty")
+```
+
+Enable logging functionality.
+
+```cmake
+set(CONFIG_LIB_COMMONS_LOGGING ON)
+```
+
+### Producer
+
+#### Basic Backend
+
+Disable tokenized backend to directly output plaintext log messages.
+
+```cmake
+set(CONFIG_LIB_COMMONS_LOGGING_TOKENIZED OFF)
+```
+
+#### Tokenized Backend
+
+Otherwise, enable tokenized backend to replace strings with 32-bit tokens.This
+conserves space in final binary and reduces load on data channels.
+
+```cmake
+set(CONFIG_LIB_COMMONS_LOGGING_TOKENIZED ON)
+```
+
+Add below linker sections to your linker script. Because pw_tokenizer stores the
+mapping of strings with 32-bit tokens in the below linker sections.
+
+Please see <THIRD_PARTY_DIR>/pigweed/pw_tokenizer/pw_tokenizer_linker_sections.ld.
+
+```linker
+.pw_tokenizer.info 0x0 (INFO) :
+{
+    KEEP(*(.pw_tokenizer.info))
+}
+
+.pw_tokenizer.entries 0x0 (INFO) :
+{
+    KEEP(*(.pw_tokenizer.entries.*))
+    KEEP(*(.rodata.*_pw_tokenizer_string_entry_*))
+}
+```
+
+### Consumer
+
+Define maximum buffer size to store log messages.
+
+```cmake
+set(CONFIG_LIB_COMMONS_LOGGING_BUFFER_SIZE 128)
+```
+
+Define maximum number of consumers possible to register for receiving log messages.
+
+```cmake
+set(CONFIG_LIB_COMMONS_LOGGING_MAX_CONSUMERS 1)
+```
+
+The script 'serial_detokenizer.py' requires the data stream to be in base64
+encoding to be able to output the detokenized logs on serial console. So, the
+project must have built with below option enabled.
+
+```cmake
+set(CONFIG_LIB_COMMONS_LOGGING_BASE64_ENCODING ON)
+```
+
+Create a consumer to process the log messages and send to required output
+(eg: UART, JTAG, Memory, etc...)
+
+```c
+#include "LogToOutput.hpp"
+
+enum LogConsumerId
+{
+    cLogToUartId = 0,     ///< Log consumer for UART output
+    cMaxLogConsumerId     ///< Maximum number of log consumers
+};
+COMPILE_ASSERT(cMaxLogConsumerId == CONFIG_LIB_COMMONS_LOGGING_MAX_CONSUMERS, "cMaxLogConsumerId exceeds CONFIG_LIB_COMMONS_LOGGING_MAX_CONSUMERS");
+
+class LogToUart final : public LogToOutput
+{
+public:
+
+    /**
+     * @brief Initialize the log consumer for UART output.
+     */
+    void Initialize() override
+    {
+
+    }
+
+    /**
+     * @brief Process a log message and output it to UART
+     *
+     * @param[in] pMessage Pointer to the log message.
+     * @param[in] length Length of the log message.
+     */
+    void ProcessLogMessage(const uint8_t* pMessage, size_t length) override
+    {
+        const uint8_t* pLogMessage = pMessage;
+        size_t messageLength = length;
+
+    #if CONFIG_LIB_COMMONS_LOGGING_BASE64_ENCODING
+        size_t base64MessageLength = 0;
+        const char* pBase64Message = ConvertToBase64(pLogMessage, messageLength, base64MessageLength);
+        if( pBase64Message != nullptr)
+        {
+            pLogMessage = reinterpret_cast<const uint8_t*>(pBase64Message);
+            messageLength = base64MessageLength;
+        }
+    #endif
+
+        // Output the log message to UART
+    }
+};
+```
+
+Register the new consumer with logging core for receiving log messages.
+
+```c
+static LogToUart logToUart;
+LogCore::RegisterConsumer(cLogToUartId, logToUart);
+```
+
+### Asynchronous
+
+Handling log messages is a low priority task. So, Zephyr based builds can
+enable below setting to push the log messages into a queue first and later
+send them to consumer(s) in thread context.
+
+```cmake
+set(CONFIG_LIB_COMMONS_LOGGING_ASYNC ON)
+```
+
+Create a queue and start the logging core to start sending the log messages
+to consumer(s).
+
+```c
+#include "LogCore.hpp"
+
+#if CONFIG_LIB_COMMONS_LOGGING_ASYNC
+    // Allocate a static buffer to store log messages
+    static uint8_t logBuffer[1024];
+    LogCore::InitializeQueue(logBuffer, sizeof(logBuffer));
+
+    // Start the log core to process the queue
+    LogCore::Start();
+#endif
+```
+
+## Detokenize Logs
+
+Create and activate a python virtual environment
+
+```bash
+python -m venv ~/.venv
+source ~/.venv/bin/activate
+```
+
+Install the dependencies
+
+```bash
+pip install -e <THIRD_PARTY_DIR>/pigweed/pw_tokenizer/py
+```
+
+Generate token database from an ELF file
+
+```bash
+python3 <THIRD_PARTY_DIR>/pigweed/pw_tokenizer/py/pw_tokenizer/database.py create -d token_database.csv -t csv <ELF file>
+```
+
+Live serial detokenization,
+
+```bash
+python3 <THIRD_PARTY_DIR>/pigweed/pw_tokenizer/py/pw_tokenizer/serial_detokenizer.py -b <SERIAL-BAUD-RATE> -d <SERIAL-PORT> token_database.csv
+```

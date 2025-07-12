@@ -10,7 +10,7 @@ config LIB_COMMONS_LOGGING
   help
     This option enables commons logging library.
 
-config LIB_COMMONS_TOKENIZED_LOGGING
+config LIB_COMMONS_LOGGING_TOKENIZED
   bool "Enable tokenized logging"
   depends on LIB_COMMONS_LOGGING
   default n
@@ -37,3 +37,10 @@ config LIB_COMMONS_LOGGING_MAX_CONSUMERS
   default 1
   help
     This option sets the maximum number of consumers that can receive log messages.
+
+config LIB_COMMONS_LOGGING_BASE64_ENCODING
+  bool "Enable base64 encoding for tokenized logs"
+  depends on LIB_COMMONS_LOGGING_TOKENIZED
+  default n
+  help
+    This option enables base64 encoding for the tokenized logs

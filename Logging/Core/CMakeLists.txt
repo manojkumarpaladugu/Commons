@@ -21,4 +21,3 @@ target_sources(${COMMONS_LOGGING_LIBRARY_NAME}
     PRIVATE
         ${LOG_CORE_SRC_LIST}
 )
-
