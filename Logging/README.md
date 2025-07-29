@@ -60,7 +60,7 @@ Otherwise, they can be defined in source file before including the Logging.h.
 #include "Logging.h"
 ```
 
-As an example, the following code snippet shows the usage of different logging macros.
+For example, the following code snippet shows the usage of different logging macros.
 
 ```c
 // filename: Main.cpp
@@ -79,7 +79,7 @@ int main(void)
 ## Configuration
 
 This describes the configuration options for the Common Logging Library,
-typically set via a CMake or a Kconfig-like system. These options allow you to
+typically set via a CMake or a Kconfig like system. These options allow you to
 customize the behavior and features of the logging facility within your
 application or system.
 
@@ -246,6 +246,61 @@ to consumer(s).
     // Start the log core to process the queue
     LogCore::Start();
 #endif
+```
+
+### Redirect Zephyr logs to Commons logging
+
+Configure Zephyr logging subsystem to redirect it's logs to custom logging framework.
+
+```kconfig
+CONFIG_LOG=y
+CONFIG_LOG_PRINTK=y
+CONFIG_LOG_CUSTOM_HEADER=y
+```
+
+Define a header file (zephyr_custom_log.h) to redirect the logs from zephyr
+logging macros to Commons logging macros.
+
+```c
+#pragma once
+
+#define MODULE_NAME "Zephyr"
+
+#include <zephyr/logging/log_core.h>
+#include <zephyr/sys/__assert.h>
+
+#include "Logging.h"
+
+#undef LOG_DBG
+#undef LOG_INF
+#undef LOG_WRN
+#undef LOG_ERR
+
+#define Z_COMMONS_LOG(_level, customLogMacro, fmt, ...) \
+    do {                                                \
+        if (!Z_LOG_CONST_LEVEL_CHECK(_level)) {         \
+            break;                                      \
+        }                                               \
+        customLogMacro(fmt, ##__VA_ARGS__);             \
+    } while(false)
+
+#define LOG_DBG(fmt, ...) \
+    Z_COMMONS_LOG(LOG_LEVEL_DBG, LOG_DEBUG, fmt, ##__VA_ARGS__)
+
+#define LOG_INF(fmt, ...) \
+    Z_COMMONS_LOG(LOG_LEVEL_INF, LOG_INFO, fmt, ##__VA_ARGS__)
+
+#define LOG_WRN(fmt, ...) \
+    Z_COMMONS_LOG(LOG_LEVEL_WRN, LOG_WARN, fmt, ##__VA_ARGS__)
+
+#define LOG_ERR(fmt, ...) \
+    Z_COMMONS_LOG(LOG_LEVEL_ERR, LOG_ERROR, fmt, ##__VA_ARGS__)
+```
+
+In CMake, include the path to zephyr_custom_log.h
+
+```cmake
+zephyr_include_directories(/path/to/customlogheader)
 ```
 
 ## Detokenize Logs

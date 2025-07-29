@@ -53,7 +53,6 @@ likely intended to be reused across different parts of the project.
   1. Finally, link the module with the application being built
 
       ```cmake
-      zephyr_link_libraries(Commons)
       target_link_libraries(app PRIVATE Commons)
       ```
 
