@@ -9,11 +9,34 @@
 // ----------------------------------------------------------------------------
 
 #include "LogCore.hpp"
-#if CONFIG_LIB_COMMONS_LOGGING_ASYNC
+#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
     #include "LogQueue.hpp"
-    #include "LogThread.hpp"
 #endif
 #include "LogConsumer.hpp"
+
+// ----------------------------------------------------------------------------
+// Macro definitions
+// ----------------------------------------------------------------------------
+
+#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
+    // Define thread stack size and priority
+    #define LOG_THREAD_STACK_SIZE   (1024)
+    #define LOG_THREAD_PRIORITY     (5)
+#endif
+
+// ----------------------------------------------------------------------------
+// Variable definitions
+// ----------------------------------------------------------------------------
+
+#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
+    // Thread stack
+    K_THREAD_STACK_DEFINE(gLogThreadStack, LOG_THREAD_STACK_SIZE);
+
+    // Thread data structure
+    struct k_thread gLogThreadData;
+
+    struct k_sem LogCore::mDataReadySem;
+#endif
 
 // ----------------------------------------------------------------------------
 // Public functions
@@ -26,11 +49,18 @@ void LogCore::RegisterConsumer(uint8_t id, LogToOutput &consumer)
     LogConsumer::RegisterConsumer(consumer);
 }
 
-#if CONFIG_LIB_COMMONS_LOGGING_ASYNC
+#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
 void LogCore::InitializeQueue(void* pBuffer, size_t bufferSize)
 {
     LogQueue::Initialize(pBuffer, bufferSize);
-    LogThread::CreateThread(LogCore::DispatchLogMessage);
+
+    // Create and start the thread
+    k_thread_create(&gLogThreadData, gLogThreadStack, LOG_THREAD_STACK_SIZE,
+                    LogCore::LogThreadEntry, NULL, NULL, NULL,
+                    LOG_THREAD_PRIORITY, 0, K_NO_WAIT);
+
+    // Initialize the binary semaphore for data ready signal
+    k_sem_init(&mDataReadySem, 0, 1);
 }
 #endif
 
@@ -38,68 +68,72 @@ void LogCore::EnablePanicMode()
 {
     mPanicModeEnabled = true;
 
-    // Flush all the queued log messages immediately
-#if CONFIG_LIB_COMMONS_LOGGING_ASYNC
-    LogCore::Flushlogs();
+#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
+    // In panic mode, flush all the queued log messages immediately.
+    Flushlogs();
 #endif
 }
 
 void LogCore::HandleLogMessage(const uint8_t* pMessage, size_t length, int level)
 {
-    bool synchronousLogging = true;
+    bool deferredLogging = false;
 
-#if CONFIG_LIB_COMMONS_LOGGING_ASYNC
-    synchronousLogging = false;
+#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
+    deferredLogging = true;
 #endif
 
-    if (synchronousLogging || mPanicModeEnabled)
+    if (!deferredLogging || mPanicModeEnabled)
     {
-        // In panic mode, we send the log message immediately without queuing
+        // In immediate mode, we send the log message immediately without queuing
         LogConsumer::SendLogMessage(pMessage, length, level);
     }
+#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
     else
     {
-    #if CONFIG_LIB_COMMONS_LOGGING_ASYNC
-        // In normal mode, we can queue the log message for asynchronous processing
+        // In deferred mode, we can queue the log message and process later
         LogQueue::PushLog(pMessage, length, level);
-    #endif
+        mLogThresholdCounter++;
+
+        if (mLogThresholdCounter >= CONFIG_LIB_COMMONS_LOGGING_THRESHOLD)
+        {
+            // If the threshold is reached, signal the log thread to process the logs
+            mLogThresholdCounter = 0;
+            k_sem_give(&mDataReadySem);
+        }
     }
+#endif
 }
 
 // ----------------------------------------------------------------------------
 // Private functions
 // ----------------------------------------------------------------------------
 
-#if CONFIG_LIB_COMMONS_LOGGING_ASYNC
-bool LogCore::DispatchLogMessage()
+#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
+void LogCore::LogThreadEntry(void* arg1, void* arg2, void* arg3)
 {
-    bool messageDispatched = false;
-    uint8_t* pMessage = nullptr;
-    size_t messageLength = 0;
-    int level = 0;
-
-    LogQueue::PullLog(pMessage, messageLength, level);
-    if (pMessage)
+    while (1)
     {
-        // Send the log message to all registered consumers
-        LogConsumer::SendLogMessage(pMessage, messageLength, level);
-        messageDispatched = true;
-    }
-    else
-    {
-        // No more messages to send
-        messageDispatched = false;
-    }
+        // Wait for data ready signal before processing logs
+        k_sem_take(&mDataReadySem, K_FOREVER);
 
-    return messageDispatched;
+        Flushlogs();
+    }
 }
 
 void LogCore::Flushlogs()
 {
-    bool messageDispatched = false;
+    uint8_t* pMessage = nullptr;
+    size_t messageLength = 0;
+    int level = 0;
+
     do
     {
-        messageDispatched = LogCore::DispatchLogMessage();
-    } while (messageDispatched);
+        LogQueue::PullLog(pMessage, messageLength, level);
+        if (pMessage)
+        {
+            // Send the log message to all registered consumers
+            LogConsumer::SendLogMessage(pMessage, messageLength, level);
+        }
+    } while (pMessage);
 }
 #endif

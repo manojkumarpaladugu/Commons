@@ -4,10 +4,10 @@
 # Author: Manoj Kumar Paladugu <paladugumanojkumar@gmail.com>
 #
 
-if (CONFIG_LIB_COMMONS_LOGGING_ASYNC)
+if (CONFIG_LIB_COMMONS_LOGGING_DEFERRED)
     target_compile_definitions(${COMMONS_LOGGING_LIBRARY_NAME}
         PUBLIC
-            CONFIG_LIB_COMMONS_LOGGING_ASYNC=1
+            CONFIG_LIB_COMMONS_LOGGING_DEFERRED=1
     )
 
     target_include_directories(${COMMONS_LOGGING_LIBRARY_NAME}

@@ -10,7 +10,7 @@
 
 #include "CommonTypes.h"
 #include "LogConsumer.hpp"
-#if CONFIG_LIB_COMMONS_LOGGING_ASYNC
+#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
     #include "LogQueue.hpp"
 #endif
 

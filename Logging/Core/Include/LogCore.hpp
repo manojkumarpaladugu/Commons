@@ -10,6 +10,10 @@
 
 #include "LogToOutput.hpp"
 
+#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
+    #include <zephyr/kernel.h>
+#endif
+
 // ----------------------------------------------------------------------------
 // Class definition
 // ----------------------------------------------------------------------------
@@ -25,7 +29,7 @@ public:
      */
     static void RegisterConsumer(uint8_t id, LogToOutput &consumer);
 
-#if CONFIG_LIB_COMMONS_LOGGING_ASYNC
+#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
     /**
      * @brief Initializes the log queue and start the log thread.
      *
@@ -51,16 +55,18 @@ public:
 
 private:
 
-#if CONFIG_LIB_COMMONS_LOGGING_ASYNC
+#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
     /**
-     * @brief Dispatches one log message at a time to registered consumers.
+     * @brief Entry function for the log thread.
      *
      * This function is a thread entry point to process and send
      * all pending log messages to the registered consumers.
      *
-     * @return true if message was dispatched, false otherwise.
+     * @param arg1 Unused argument.
+     * @param arg2 Unused argument.
+     * @param arg3 Unused argument.
      */
-    static bool DispatchLogMessage();
+    static void LogThreadEntry(void* arg1, void* arg2, void* arg3);
 
     /**
      * @brief Flushes all queued log messages immediately.
@@ -69,7 +75,10 @@ private:
      * pending log messages are sent out without delay.
      */
     static void Flushlogs();
+
+    inline static uint32_t mLogThresholdCounter = 0;  // Counter for tracking log message threshold
+    static struct k_sem    mDataReadySem;             // Semaphore to signal that data is ready for processing
 #endif
 
-    inline static bool mPanicModeEnabled = false;        // Flag to indicate if panic mode is enabled
+    inline static bool     mPanicModeEnabled = false; // Flag to indicate if panic mode is enabled
 };

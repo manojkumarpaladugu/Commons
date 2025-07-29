@@ -8,8 +8,10 @@
 // Header includes
 // ----------------------------------------------------------------------------
 
-#include "Assert.h"
+#define LOG_MODULE_NAME "Assert"
+
 #include "Logging.h"
+#include "Assert.h"
 #include "LogCore.hpp"
 
 #include <inttypes.h>

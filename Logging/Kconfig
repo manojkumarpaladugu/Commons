@@ -17,12 +17,21 @@ config LIB_COMMONS_LOGGING_TOKENIZED
   help
     This option enables string tokenization mode in commons logging library.
 
-config LIB_COMMONS_LOGGING_ASYNC
-  bool "Enable asynchronous logging"
+config LIB_COMMONS_LOGGING_DEFERRED
+  bool "Deferred logging"
   depends on LIB_COMMONS_LOGGING
   default n
   help
-    This option enables a queue for logging messages, allowing asynchronous logging.
+    Log messages are buffered and processed later.This mode has the
+    least impact on the application. Time consuming processing is
+    deferred to the known context.
+
+config LIB_COMMONS_LOGGING_THRESHOLD
+  int "Number of buffered log messages before flushing"
+  default 10
+  depends on LIB_COMMONS_LOGGING_DEFERRED
+  help
+    When number of buffered messages reaches the threshold thread is waken up.
 
 config LIB_COMMONS_LOGGING_BUFFER_SIZE
   int "Maximum buffer size for logging messages"

@@ -87,7 +87,8 @@ application or system.
 |---|---|---|---|---|
 | `CONFIG_LIB_COMMONS_LOGGING` | `bool` | `n` | None | Enables or disables the entire common logging library. |
 | `CONFIG_LIB_COMMONS_LOGGING_TOKENIZED` | `bool` | `n` | `CONFIG_LIB_COMMONS_LOGGING` | Enables string tokenization mode for logging messages. When enabled, log messages are converted into numerical tokens, which can reduce memory footprint and improve logging performance, especially in resource-constrained environments. |
-| `CONFIG_LIB_COMMONS_LOGGING_ASYNC` | `bool` | `n` | `CONFIG_LIB_COMMONS_LOGGING` | Enables asynchronous logging. This option utilizes an internal queue to buffer log messages, allowing the logging operations to be non-blocking for the main application thread. A consumer thread pulls messages from the internal queue and forwards to all the registered consumers. |
+| `CONFIG_LIB_COMMONS_LOGGING_DEFERRED` | `bool` | `n` | `CONFIG_LIB_COMMONS_LOGGING` | Enables deferred logging. This option utilizes an internal queue to buffer log messages, allowing the logging operations to be non-blocking for the main application thread. A consumer thread pulls messages from the internal queue and forwards to all the registered consumers. |
+| `CONFIG_LIB_COMMONS_LOGGING_THRESHOLD` | `int` | `5` | `CONFIG_LIB_COMMONS_LOGGING_DEFERRED` | When number of buffered messages reaches the threshold thread is waken up. |
 | `CONFIG_LIB_COMMONS_LOGGING_BUFFER_SIZE` | `int` | `128` | None | Sets the maximum size of the internal buffer used for storing logging messages. This is particularly relevant when asynchronous logging is enabled. The value must be between 64 and 256 characters. |
 | `CONFIG_LIB_COMMONS_LOGGING_MAX_CONSUMERS` | `int` | `1` | None | Defines the maximum number of consumer entities (e.g., threads or tasks) that can simultaneously process and output log messages to the different outputs (eg: Stdout, UART and Memory). |
 | `CONFIG_LIB_COMMONS_LOGGING_BASE64_ENCODING` | `bool` | `n` | `CONFIG_LIB_COMMONS_LOGGING_TOKENIZED` | Enables Base64 encoding for tokenized log messages. This is useful for ensuring that tokenized (potentially binary) log data can be safely transmitted or stored in systems that primarily handle text-based data. This option only takes effect if `CONFIG_LIB_COMMONS_LOGGING_TOKENIZED` is also enabled. |
@@ -229,7 +230,8 @@ enable below setting to push the log messages into a queue first and later
 send them to consumer(s) in thread context.
 
 ```cmake
-set(CONFIG_LIB_COMMONS_LOGGING_ASYNC ON)
+set(CONFIG_LIB_COMMONS_LOGGING_DEFERRED ON)
+set(CONFIG_LIB_COMMONS_LOGGING_THRESHOLD 5)
 ```
 
 Create a queue and start the logging core to start sending the log messages
@@ -238,13 +240,10 @@ to consumer(s).
 ```c
 #include "LogCore.hpp"
 
-#if CONFIG_LIB_COMMONS_LOGGING_ASYNC
+#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
     // Allocate a static buffer to store log messages
     static uint8_t logBuffer[1024];
     LogCore::InitializeQueue(logBuffer, sizeof(logBuffer));
-
-    // Start the log core to process the queue
-    LogCore::Start();
 #endif
 ```
 
@@ -262,6 +261,7 @@ Define a header file (zephyr_custom_log.h) to redirect the logs from zephyr
 logging macros to Commons logging macros.
 
 ```c
+// filename: zephyr_custom_log.h
 #pragma once
 
 #define MODULE_NAME "Zephyr"

@@ -108,6 +108,7 @@ void LogQueue::PullLog(uint8_t* &pMessage, size_t &messageLength, int &level)
     // Check if the buffer has data to read
     if (head == tail)
     {
+        pMessage = nullptr;
         return; // No data available
     }
 
@@ -125,6 +126,7 @@ void LogQueue::PullLog(uint8_t* &pMessage, size_t &messageLength, int &level)
 
     if (availableData < sizeof(LogMetadata_t))
     {
+        pMessage = nullptr;
         return; // Not enough data to read metadata
     }
 
