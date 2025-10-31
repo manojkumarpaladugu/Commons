@@ -1,4 +1,4 @@
 #!/bin/bash
 
-cmake -S . -B _out
-cmake --build _out
+cmake -S App/Logging -B App/Logging/_out
+cmake --build App/Logging/_out

@@ -155,11 +155,11 @@ class LogToUart final : public LogToOutput
 public:
 
     /**
-     * @brief Initialize the log consumer for UART output.
+     * @brief Initialization.
      */
     void Initialize() override
     {
-
+        // Initialization if needed.
     }
 
     /**
@@ -170,6 +170,9 @@ public:
      */
     void ProcessLogMessage(const uint8_t* pMessage, size_t length) override
     {
+        ASSERT(pMessage != nullptr);
+        ASSERT(length > 0);
+
         const uint8_t* pLogMessage = pMessage;
         size_t messageLength = length;
 
