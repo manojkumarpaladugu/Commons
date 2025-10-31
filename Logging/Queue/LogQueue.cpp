@@ -11,12 +11,21 @@
 #include "LogQueue.hpp"
 #include "Assert.h"
 
+#include <algorithm>
+
+// ----------------------------------------------------------------------------
+// Macro definitions
+// ----------------------------------------------------------------------------
+
+#define LOG_METADATA_SIGNATURE 0xDEADBEEF
+
 // ----------------------------------------------------------------------------
 // Datatype definitions
 // ----------------------------------------------------------------------------
 
 typedef struct __attribute__((packed)) LogMetadata
 {
+    uint32_t    signature;          // Signature for identifying valid log message
     uint32_t    sequenceNumber;     // Sequence number for the log message
     uint32_t    length;             // Length of the log message
     uint8_t     level;              // Log level
@@ -27,7 +36,8 @@ typedef struct __attribute__((packed)) LogMetadata
 // ----------------------------------------------------------------------------
 
 LogQueue_t LogQueue::mLogQueue;
-uint8_t LogQueue::messageBuffer[cLogMessageBuffer + 1];
+uint8_t LogQueue::mMessageBuffer[cLogMessageBufferSize + 1];
+uint32_t LogQueue::mSequenceNumber = 0;
 
 // ----------------------------------------------------------------------------
 // Public functions
@@ -44,7 +54,7 @@ void LogQueue::Initialize(void* pBuffer, size_t size)
     mLogQueue.tail = 0;
 }
 
-void LogQueue::PushLog(const uint8_t* pMessage, size_t messageLength, int level)
+int LogQueue::PushLog(const uint8_t* pMessage, size_t messageLength, int level)
 {
     ASSERT(pMessage != NULL);
     ASSERT(messageLength > 0);
@@ -57,7 +67,14 @@ void LogQueue::PushLog(const uint8_t* pMessage, size_t messageLength, int level)
     ASSERT(pQueueBuffer != NULL);
     ASSERT(queueSize > sizeof(LogMetadata_t));
 
-    // Check enough space is available in the log buffer
+    size_t totalMessageLength = std::min(messageLength + sizeof(LogMetadata_t), queueSize - 1);
+    if (totalMessageLength > queueSize)
+    {
+        // Message is too large to fit in the buffer even when empty
+        return -EMSGSIZE;
+    }
+
+    // Check if enough space is available in the log buffer
     size_t availableSpace = 0;
     if (tail >= head)
     {
@@ -70,14 +87,21 @@ void LogQueue::PushLog(const uint8_t* pMessage, size_t messageLength, int level)
         availableSpace = head - tail;
     }
 
-    if (availableSpace < (messageLength + sizeof(LogMetadata_t)))
+    if (totalMessageLength > availableSpace)
     {
-        return; // Not enough space
+    #if CONFIG_COMMONS_LOGGING_OVERFLOW
+        // Not enough space, drop oldest messages
+        mLogQueue.head = tail;
+    #else
+        return -ENOBUFS;
+    #endif
     }
 
     // Create metadata for the log message
-    LogMetadata_t metadata = { .sequenceNumber = 0,                             // TODO: Placeholder for sequence number, can be set later
-                               .length         = static_cast<uint32_t>(messageLength),
+    uint32_t messageLengthToCopy = static_cast<uint32_t>(totalMessageLength - sizeof(LogMetadata_t));
+    LogMetadata_t metadata = { .signature      = LOG_METADATA_SIGNATURE,
+                               .sequenceNumber = mSequenceNumber++ % UINT32_MAX,
+                               .length         = messageLengthToCopy,
                                .level          = static_cast<uint8_t>(level) };
 
     // Copy the metadata to the log buffer
@@ -88,14 +112,16 @@ void LogQueue::PushLog(const uint8_t* pMessage, size_t messageLength, int level)
     }
 
     // Copy the log message to the log buffer
-    for (size_t i = 0; i < messageLength; ++i)
+    for (size_t i = 0; i < messageLengthToCopy; ++i)
     {
         static_cast<uint8_t*>(pQueueBuffer)[tail] = pMessage[i];
         tail = (tail + 1) % queueSize;      // Wrap around if needed
     }
+
+    return 0;
 }
 
-void LogQueue::PullLog(uint8_t* &pMessage, size_t &messageLength, int &level)
+int LogQueue::PullLog(uint8_t* &pMessage, size_t &messageLength, int &level)
 {
     uint8_t* pQueueBuffer = static_cast<uint8_t*>(mLogQueue.pBuffer);
     size_t queueSize = mLogQueue.size;
@@ -108,8 +134,7 @@ void LogQueue::PullLog(uint8_t* &pMessage, size_t &messageLength, int &level)
     // Check if the buffer has data to read
     if (head == tail)
     {
-        pMessage = nullptr;
-        return; // No data available
+        return -ENODATA; // No data available
     }
 
     size_t availableData = 0;
@@ -126,11 +151,10 @@ void LogQueue::PullLog(uint8_t* &pMessage, size_t &messageLength, int &level)
 
     if (availableData < sizeof(LogMetadata_t))
     {
-        pMessage = nullptr;
-        return; // Not enough data to read metadata
+        return -EBADMSG; // Not enough data to read metadata
     }
 
-    // Read the metadata from the transport buffer
+    // Read the metadata from the queue buffer
     LogMetadata_t metadata;
     for (size_t i = 0; i < sizeof(LogMetadata_t); ++i)
     {
@@ -138,16 +162,23 @@ void LogQueue::PullLog(uint8_t* &pMessage, size_t &messageLength, int &level)
         head = (head + 1) % queueSize;      // Wrap around if needed
     }
 
-    level = metadata.level;
-    messageLength = metadata.length;
+    if (metadata.signature != LOG_METADATA_SIGNATURE)
+    {
+        return -EBADMSG; // Invalid log message signature
+    }
 
-    // Read the log message from the transport buffer
+    level = metadata.level;
+    messageLength = std::min(metadata.length, cLogMessageBufferSize);
+
+    // Read the log message from the queue buffer
     for (size_t i = 0; i < messageLength; ++i)
     {
-        messageBuffer[i] = static_cast<uint8_t*>(pQueueBuffer)[head];
+        mMessageBuffer[i] = static_cast<uint8_t*>(pQueueBuffer)[head];
         head = (head + 1) % queueSize;      // Wrap around if needed
     }
 
     // Set the output pointer to the message buffer
-    pMessage = messageBuffer;
+    pMessage = mMessageBuffer;
+
+    return 0;
 }

@@ -4,24 +4,24 @@
 # Author: Manoj Kumar Paladugu <paladugumanojkumar@gmail.com>
 #
 
-if(NOT DEFINED CONFIG_LIB_COMMONS_LOGGING_BUFFER_SIZE)
-    message(FATAL_ERROR "CONFIG_LIB_COMMONS_LOGGING_BUFFER_SIZE is not defined.\
+if(NOT DEFINED CONFIG_COMMONS_LOGGING_BUFFER_SIZE)
+    message(FATAL_ERROR "CONFIG_COMMONS_LOGGING_BUFFER_SIZE is not defined.\
                          Please set the logging buffer size.")
 endif()
 
 target_compile_definitions(${COMMONS_LOGGING_LIBRARY_NAME}
     PUBLIC
-        CONFIG_LIB_COMMONS_LOGGING_BUFFER_SIZE=${CONFIG_LIB_COMMONS_LOGGING_BUFFER_SIZE}
+        CONFIG_COMMONS_LOGGING_BUFFER_SIZE=${CONFIG_COMMONS_LOGGING_BUFFER_SIZE}
 )
 
 set(LOG_PRODUCER_SRC_LIST)
 set(LOG_PRODUCER_LINK_LIBS pw_log)
 
 # Configure pigweed's backend before fetching pigweed library
-if (CONFIG_LIB_COMMONS_LOGGING_TOKENIZED)
+if (CONFIG_COMMONS_LOGGING_TOKENIZED)
     target_compile_definitions(${COMMONS_LOGGING_LIBRARY_NAME}
         PUBLIC
-            CONFIG_LIB_COMMONS_LOGGING_TOKENIZED=1
+            CONFIG_COMMONS_LOGGING_TOKENIZED=1
     )
 
     set(pw_log_BACKEND
@@ -46,10 +46,10 @@ if (CONFIG_LIB_COMMONS_LOGGING_TOKENIZED)
 
     list(APPEND LOG_PRODUCER_SRC_LIST ${CMAKE_CURRENT_SOURCE_DIR}/TokenizedLogProducer.cpp)
 
-    if (CONFIG_LIB_COMMONS_LOGGING_BASE64_ENCODING)
+    if (CONFIG_COMMONS_LOGGING_BASE64_ENCODING)
         target_compile_definitions(${COMMONS_LOGGING_LIBRARY_NAME}
             PUBLIC
-                CONFIG_LIB_COMMONS_LOGGING_BASE64_ENCODING=1
+                CONFIG_COMMONS_LOGGING_BASE64_ENCODING=1
         )
         list(APPEND LOG_PRODUCER_LINK_LIBS pw_tokenizer.base64)
     endif()

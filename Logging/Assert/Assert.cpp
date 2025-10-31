@@ -8,7 +8,7 @@
 // Header includes
 // ----------------------------------------------------------------------------
 
-#define LOG_MODULE_NAME "Assert"
+#define LOG_FORMAT(level, module, file, line, message) "<" module "> - " message "\n"
 
 #include "Logging.h"
 #include "Assert.h"

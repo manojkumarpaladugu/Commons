@@ -35,7 +35,7 @@ Then include the 'Logging.h' header file in source files.
                     source file are outputted. `Default is 'LOG_LEVEL_DEBUG'`.
 * LOG_FORMAT(level, module, file, line, message) - Defines the format of log
         strings from this source file.
-        `Default is 'level " " module "|" file ":" line " - " message "\n"'`.
+        `Default is "<" level "|" module "|" file ":" line "> - " message "\n"'`.
 
 The macros `LOG_MODULE_NAME` and `MODULE_LOG_LEVEL` can be defined per module
 or the entire application through CMake file.
@@ -54,7 +54,7 @@ Otherwise, they can be defined in source file before including the Logging.h.
 // filename: Main.cpp
 #define LOG_MODULE_NAME "main"
 #define MODULE_LOG_LEVEL LOG_LEVEL_DEBUG
-#define LOG_FORMAT(level, module, file, line, message) level " " module "|" file ":" line " - " message "\n"
+#define LOG_FORMAT(level, module, file, line, message) "<" level "|" module "|" file ":" line "> - " message "\n"
 
 // Must be included only after defining the above macros
 #include "Logging.h"
@@ -85,13 +85,14 @@ application or system.
 
 | Option Name | Type | Default | Dependencies | Description |
 |---|---|---|---|---|
-| `CONFIG_LIB_COMMONS_LOGGING` | `bool` | `n` | None | Enables or disables the entire common logging library. |
-| `CONFIG_LIB_COMMONS_LOGGING_TOKENIZED` | `bool` | `n` | `CONFIG_LIB_COMMONS_LOGGING` | Enables string tokenization mode for logging messages. When enabled, log messages are converted into numerical tokens, which can reduce memory footprint and improve logging performance, especially in resource-constrained environments. |
-| `CONFIG_LIB_COMMONS_LOGGING_DEFERRED` | `bool` | `n` | `CONFIG_LIB_COMMONS_LOGGING` | Enables deferred logging. This option utilizes an internal queue to buffer log messages, allowing the logging operations to be non-blocking for the main application thread. A consumer thread pulls messages from the internal queue and forwards to all the registered consumers. |
-| `CONFIG_LIB_COMMONS_LOGGING_THRESHOLD` | `int` | `5` | `CONFIG_LIB_COMMONS_LOGGING_DEFERRED` | When number of buffered messages reaches the threshold thread is waken up. |
-| `CONFIG_LIB_COMMONS_LOGGING_BUFFER_SIZE` | `int` | `128` | None | Sets the maximum size of the internal buffer used for storing logging messages. This is particularly relevant when asynchronous logging is enabled. The value must be between 64 and 256 characters. |
-| `CONFIG_LIB_COMMONS_LOGGING_MAX_CONSUMERS` | `int` | `1` | None | Defines the maximum number of consumer entities (e.g., threads or tasks) that can simultaneously process and output log messages to the different outputs (eg: Stdout, UART and Memory). |
-| `CONFIG_LIB_COMMONS_LOGGING_BASE64_ENCODING` | `bool` | `n` | `CONFIG_LIB_COMMONS_LOGGING_TOKENIZED` | Enables Base64 encoding for tokenized log messages. This is useful for ensuring that tokenized (potentially binary) log data can be safely transmitted or stored in systems that primarily handle text-based data. This option only takes effect if `CONFIG_LIB_COMMONS_LOGGING_TOKENIZED` is also enabled. |
+| `CONFIG_COMMONS_LOGGING` | `bool` | `n` | None | Enables or disables the entire logging library. |
+| `CONFIG_COMMONS_LOGGING_TOKENIZED` | `bool` | `n` | `CONFIG_COMMONS_LOGGING` | Enables string tokenization mode for logging messages. When enabled, log messages are converted into numerical tokens, which can reduce memory footprint and improve logging performance, especially in resource-constrained environments. |
+| `CONFIG_COMMONS_LOGGING_DEFERRED` | `bool` | `n` | `CONFIG_COMMONS_LOGGING` | Enables deferred logging. This option utilizes an internal queue to buffer log messages, allowing the logging operations to be non-blocking for the main application thread. A consumer thread pulls messages from the internal queue and forwards to all the registered consumers. |
+| `CONFIG_COMMONS_LOGGING_THRESHOLD` | `int` | `5` | `CONFIG_COMMONS_LOGGING_DEFERRED` | When number of buffered messages reaches the threshold, the logging thread is waken up to process messages. |
+| `CONFIG_COMMONS_LOGGING_OVERFLOW` | `bool` | `n` | `CONFIG_COMMONS_LOGGING_DEFERRED` | When the buffer is full, the old messages in logging buffer will be overwritten with latest messages. |
+| `CONFIG_COMMONS_LOGGING_BUFFER_SIZE` | `int` | `128` | None | Sets the maximum size of the internal buffer used for storing logging messages. |
+| `CONFIG_COMMONS_LOGGING_MAX_CONSUMERS` | `int` | `1` | None | Defines the maximum number of consumer entities that can simultaneously process and output log messages to the different outputs (eg: Stdout, UART and Memory). |
+| `CONFIG_COMMONS_LOGGING_BASE64_ENCODING` | `bool` | `n` | `CONFIG_COMMONS_LOGGING_TOKENIZED` | Enables Base64 encoding for tokenized log messages. This is useful for ensuring that tokenized log data can be safely transmitted or stored in systems that primarily handle text-based data. |
 
 Set THIRD_PARTY_DIR variable to the path where third party libraries needs to
 be stored.
@@ -100,30 +101,21 @@ be stored.
 set(THIRD_PARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty")
 ```
 
-Enable logging functionality.
-
-```cmake
-set(CONFIG_LIB_COMMONS_LOGGING ON)
-```
-
 ### Producer
 
 #### Basic Backend
 
-Disable tokenized backend to directly output plaintext log messages.
-
-```cmake
-set(CONFIG_LIB_COMMONS_LOGGING_TOKENIZED OFF)
-```
+Disable `CONFIG_COMMONS_LOGGING_TOKENIZED` to directly output plaintext log
+messages.
 
 #### Tokenized Backend
 
-Otherwise, enable tokenized backend to replace strings with 32-bit tokens.This
-conserves space in final binary and reduces load on data channels.
+Enable `CONFIG_COMMONS_LOGGING_TOKENIZED` to replace strings with 32-bit tokens.
+This conserves space in final binary and reduces load on data channels.
 
-```cmake
-set(CONFIG_LIB_COMMONS_LOGGING_TOKENIZED ON)
-```
+The script 'serial_detokenizer.py' requires the data stream to be in base64
+encoding. Enable `CONFIG_COMMONS_LOGGING_BASE64_ENCODING` to be able to encode
+the tokenized logs in text format.
 
 Add below linker sections to your linker script. Because pw_tokenizer stores the
 mapping of strings with 32-bit tokens in the below linker sections.
@@ -145,26 +137,6 @@ Please see <THIRD_PARTY_DIR>/pigweed/pw_tokenizer/pw_tokenizer_linker_sections.l
 
 ### Consumer
 
-Define maximum buffer size to store log messages.
-
-```cmake
-set(CONFIG_LIB_COMMONS_LOGGING_BUFFER_SIZE 128)
-```
-
-Define maximum number of consumers possible to register for receiving log messages.
-
-```cmake
-set(CONFIG_LIB_COMMONS_LOGGING_MAX_CONSUMERS 1)
-```
-
-The script 'serial_detokenizer.py' requires the data stream to be in base64
-encoding to be able to output the detokenized logs on serial console. So, the
-project must have built with below option enabled.
-
-```cmake
-set(CONFIG_LIB_COMMONS_LOGGING_BASE64_ENCODING ON)
-```
-
 Create a consumer to process the log messages and send to required output
 (eg: UART, JTAG, Memory, etc...)
 
@@ -176,7 +148,7 @@ enum LogConsumerId
     cLogToUartId = 0,     ///< Log consumer for UART output
     cMaxLogConsumerId     ///< Maximum number of log consumers
 };
-COMPILE_ASSERT(cMaxLogConsumerId == CONFIG_LIB_COMMONS_LOGGING_MAX_CONSUMERS, "cMaxLogConsumerId exceeds CONFIG_LIB_COMMONS_LOGGING_MAX_CONSUMERS");
+COMPILE_ASSERT(cMaxLogConsumerId == CONFIG_COMMONS_LOGGING_MAX_CONSUMERS, "cMaxLogConsumerId exceeds CONFIG_COMMONS_LOGGING_MAX_CONSUMERS");
 
 class LogToUart final : public LogToOutput
 {
@@ -201,7 +173,7 @@ public:
         const uint8_t* pLogMessage = pMessage;
         size_t messageLength = length;
 
-    #if CONFIG_LIB_COMMONS_LOGGING_BASE64_ENCODING
+    #if CONFIG_COMMONS_LOGGING_BASE64_ENCODING
         size_t base64MessageLength = 0;
         const char* pBase64Message = ConvertToBase64(pLogMessage, messageLength, base64MessageLength);
         if( pBase64Message != nullptr)
@@ -226,13 +198,8 @@ LogCore::RegisterConsumer(cLogToUartId, logToUart);
 ### Asynchronous
 
 Handling log messages is a low priority task. So, Zephyr based builds can
-enable below setting to push the log messages into a queue first and later
-send them to consumer(s) in thread context.
-
-```cmake
-set(CONFIG_LIB_COMMONS_LOGGING_DEFERRED ON)
-set(CONFIG_LIB_COMMONS_LOGGING_THRESHOLD 5)
-```
+enable `CONFIG_COMMONS_LOGGING_DEFERRED` to push the log messages into a
+queue first and later send them to consumer(s) in thread context.
 
 Create a queue and start the logging core to start sending the log messages
 to consumer(s).
@@ -240,7 +207,7 @@ to consumer(s).
 ```c
 #include "LogCore.hpp"
 
-#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
+#if CONFIG_COMMONS_LOGGING_DEFERRED
     // Allocate a static buffer to store log messages
     static uint8_t logBuffer[1024];
     LogCore::InitializeQueue(logBuffer, sizeof(logBuffer));

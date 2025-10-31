@@ -22,11 +22,11 @@ NOTE: Before including this header file, the following macros must be defined by
 #define LOG_LEVEL_CRITICAL      5
 
 // String representation of log levels
-#define LOG_LEVEL_DEBUG_STR     "DEBUG"
-#define LOG_LEVEL_INFO_STR      "INFO"
-#define LOG_LEVEL_WARN_STR      "WARN"
-#define LOG_LEVEL_ERROR_STR     "ERROR"
-#define LOG_LEVEL_CRITICAL_STR  "CRITICAL"
+#define LOG_LEVEL_DEBUG_STR     "DBG"
+#define LOG_LEVEL_INFO_STR      "INF"
+#define LOG_LEVEL_WARN_STR      "WRN"
+#define LOG_LEVEL_ERROR_STR     "ERR"
+#define LOG_LEVEL_CRITICAL_STR  "CRT"
 
 // Set default log module name if not defined by application
 #ifndef LOG_MODULE_NAME
@@ -40,50 +40,27 @@ NOTE: Before including this header file, the following macros must be defined by
 
 // Set default log message format if not defined by application
 #ifndef LOG_FORMAT
-#define LOG_FORMAT(level, module, file, line, message) level " " module "|" file ":" line " - " message "\n"
+#define LOG_FORMAT(level, module, file, line, message) "<" level "|" module "|" file ":" line "> - " message "\n"
 #endif
 
 // Must be included after the module name, log level and log format definitions
 #include "LoggingBackend.h"
 
-#define LOG(level, fmt, ...)               \
-    do {                                   \
-        COMPILE_ASSERT(                    \
-            (level == LOG_LEVEL_OMIT)  ||  \
-            (level == LOG_LEVEL_DEBUG) ||  \
-            (level == LOG_LEVEL_INFO)  ||  \
-            (level == LOG_LEVEL_WARN)  ||  \
-            (level == LOG_LEVEL_ERROR) ||  \
-            (level == LOG_LEVEL_CRITICAL), \
-            "Invalid log level: " #level); \
-        switch(level)                      \
-        {                                  \
-            case LOG_LEVEL_OMIT:           \
-                break;                     \
-            case LOG_LEVEL_DEBUG:          \
-                LOG_MESSAGE(level, LOG_LEVEL_DEBUG_STR, fmt, ##__VA_ARGS__); \
-                break;                     \
-            case LOG_LEVEL_INFO:           \
-                LOG_MESSAGE(level, LOG_LEVEL_INFO_STR, fmt, ##__VA_ARGS__);  \
-                break;                     \
-            case LOG_LEVEL_WARN:           \
-                LOG_MESSAGE(level, LOG_LEVEL_WARN_STR, fmt, ##__VA_ARGS__);  \
-                break;                     \
-            case LOG_LEVEL_ERROR:          \
-                LOG_MESSAGE(level, LOG_LEVEL_ERROR_STR, fmt, ##__VA_ARGS__); \
-                break;                     \
-            case LOG_LEVEL_CRITICAL:       \
-                LOG_MESSAGE(level, LOG_LEVEL_CRITICAL_STR, fmt, ##__VA_ARGS__); \
-                break;                     \
-            default:                       \
-                break;                     \
-        }                                  \
+#define LOG(level, level_string, fmt, ...)                        \
+    do {                                                          \
+        COMPILE_ASSERT(                                           \
+            (level) >= LOG_LEVEL_OMIT &&                          \
+            (level) <= LOG_LEVEL_CRITICAL,                        \
+            "Invalid log level");                                 \
+        if ((level) != LOG_LEVEL_OMIT) {                          \
+            LOG_MESSAGE(level, level_string, fmt, ##__VA_ARGS__); \
+        }                                                         \
     } while (false)
 
 // Interface macros for logging at different levels
-#define LOG_OMIT(fmt, ...)      LOG(LOG_LEVEL_OMIT, fmt, ##__VA_ARGS__)
-#define LOG_DEBUG(fmt, ...)     LOG(LOG_LEVEL_DEBUG, fmt, ##__VA_ARGS__)
-#define LOG_INFO(fmt, ...)      LOG(LOG_LEVEL_INFO, fmt, ##__VA_ARGS__)
-#define LOG_WARN(fmt, ...)      LOG(LOG_LEVEL_WARN, fmt, ##__VA_ARGS__)
-#define LOG_ERROR(fmt, ...)     LOG(LOG_LEVEL_ERROR, fmt, ##__VA_ARGS__)
-#define LOG_CRITICAL(fmt, ...)  LOG(LOG_LEVEL_CRITICAL, fmt, ##__VA_ARGS__)
+#define LOG_OMIT(fmt, ...)      LOG(LOG_LEVEL_OMIT,     "",                     fmt, ##__VA_ARGS__)
+#define LOG_DEBUG(fmt, ...)     LOG(LOG_LEVEL_DEBUG,    LOG_LEVEL_DEBUG_STR,    fmt, ##__VA_ARGS__)
+#define LOG_INFO(fmt, ...)      LOG(LOG_LEVEL_INFO,     LOG_LEVEL_INFO_STR,     fmt, ##__VA_ARGS__)
+#define LOG_WARN(fmt, ...)      LOG(LOG_LEVEL_WARN,     LOG_LEVEL_WARN_STR,     fmt, ##__VA_ARGS__)
+#define LOG_ERROR(fmt, ...)     LOG(LOG_LEVEL_ERROR,    LOG_LEVEL_ERROR_STR,    fmt, ##__VA_ARGS__)
+#define LOG_CRITICAL(fmt, ...)  LOG(LOG_LEVEL_CRITICAL, LOG_LEVEL_CRITICAL_STR, fmt, ##__VA_ARGS__)

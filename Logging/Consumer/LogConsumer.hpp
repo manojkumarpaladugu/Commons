@@ -40,5 +40,5 @@ public:
 
 private:
 
-    static LogToOutput* mConsumers[CONFIG_LIB_COMMONS_LOGGING_MAX_CONSUMERS];           // Array of registered consumers
+    static LogToOutput* mConsumers[CONFIG_COMMONS_LOGGING_MAX_CONSUMERS];           // Array of registered consumers
 };

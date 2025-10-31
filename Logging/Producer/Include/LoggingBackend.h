@@ -18,15 +18,15 @@
 #endif
 
 // Define a mapping from custom log levels to Pigweed log levels
-#define MAP_CUSTOM_LOG_LEVEL_TO_PW(level)              \
-    ((level) == LOG_LEVEL_DEBUG ? PW_LOG_LEVEL_DEBUG : \
-    (level) == LOG_LEVEL_INFO ? PW_LOG_LEVEL_INFO :    \
-    (level) == LOG_LEVEL_WARN ? PW_LOG_LEVEL_WARN :    \
-    (level) == LOG_LEVEL_ERROR ? PW_LOG_LEVEL_ERROR :  \
-    (level) == LOG_LEVEL_CRITICAL ? PW_LOG_LEVEL_CRITICAL : PW_LOG_LEVEL_DEBUG)
+#define MAP_CUSTOM_LOG_LEVEL_TO_PW(level)               \
+    ((level) == LOG_LEVEL_DEBUG ? PW_LOG_LEVEL_DEBUG :  \
+     (level) == LOG_LEVEL_INFO ? PW_LOG_LEVEL_INFO :    \
+     (level) == LOG_LEVEL_WARN ? PW_LOG_LEVEL_WARN :    \
+     (level) == LOG_LEVEL_ERROR ? PW_LOG_LEVEL_ERROR :  \
+     (level) == LOG_LEVEL_CRITICAL ? PW_LOG_LEVEL_CRITICAL : PW_LOG_LEVEL_DEBUG)
 
 // Convert the line number to string
-#define LINE_STRING                 STRINGIZE(__LINE__)
+#define LINE_STRING                 TO_STRING(__LINE__)
 
 // Provide module name and log level for the Pigweed logging system
 #define PW_LOG_MODULE_NAME          LOG_MODULE_NAME
