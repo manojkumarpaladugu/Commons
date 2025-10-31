@@ -1,16 +1,16 @@
 # Brief
 
 The Commons module is a collection of shared functionality or utilities,
-likely intended to be reused across different parts of the project.
+likely intended to be reused across different projects.
 
 ## Features
 
 * Logging:
   * Prints messages with a variety of logging levels.
 
-## Configuration
+## Integration
 
-### Zephyr Environment
+### With Zephyr RTOS
 
   For projects that use Zephyr RTOS.
 
@@ -56,9 +56,7 @@ likely intended to be reused across different parts of the project.
       target_link_libraries(app PRIVATE Commons)
       ```
 
-### Other Environment
-
-  For projects that only use 'CMake' as a build system.
+### With Others
 
   1. Add this as a submodule in your project
 

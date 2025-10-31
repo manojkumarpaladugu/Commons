@@ -13,6 +13,8 @@
 #include <cstdint>
 #include <cstddef>
 
+#include <errno.h>
+
 // ----------------------------------------------------------------------------
 // Datatype definitions
 // ----------------------------------------------------------------------------
@@ -50,8 +52,10 @@ public:
      * @param[in] pMessage A pointer to the log message.
      * @param[in] messageLength The length of the log message.
      * @param[in] level The log level of the message.
+     *
+     * @return int Returns 0 on success, otherwise returns an error code.
      */
-    static void PushLog(const uint8_t* pMessage, size_t messageLength, int level);
+    static int PushLog(const uint8_t* pMessage, size_t messageLength, int level);
 
     /**
      * @brief Pull a log message from the log queue.
@@ -61,12 +65,15 @@ public:
      * @param[out] pMessage A pointer to the retrieved log message.
      * @param[out] messageLength The length of the retrieved log message.
      * @param[out] level The log level of the retrieved message.
+     *
+     * @return int Returns 0 on success, otherwise returns an error code.
      */
-    static void PullLog(uint8_t* &pMessage, size_t &messageLength, int &level);
+    static int PullLog(uint8_t* &pMessage, size_t &messageLength, int &level);
 
 private:
 
     static LogQueue_t          mLogQueue;                                                   // Queue to store log messages
-    inline static const size_t cLogMessageBuffer = CONFIG_LIB_COMMONS_LOGGING_BUFFER_SIZE;  // Size of the log message buffer
-    static uint8_t             messageBuffer[cLogMessageBuffer + 1];                        // Buffer to hold the log message
+    inline static const size_t cLogMessageBufferSize = CONFIG_COMMONS_LOGGING_BUFFER_SIZE;  // Size of the log message buffer
+    static uint8_t             mMessageBuffer[cLogMessageBufferSize + 1];                   // Buffer to hold the log message
+    static uint32_t            mSequenceNumber;                                             // Sequence number for log messages
 };

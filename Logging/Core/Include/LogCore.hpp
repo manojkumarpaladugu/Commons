@@ -10,7 +10,7 @@
 
 #include "LogToOutput.hpp"
 
-#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
+#if CONFIG_COMMONS_LOGGING_DEFERRED
     #include <zephyr/kernel.h>
 #endif
 
@@ -29,7 +29,7 @@ public:
      */
     static void RegisterConsumer(uint8_t id, LogToOutput &consumer);
 
-#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
+#if CONFIG_COMMONS_LOGGING_DEFERRED
     /**
      * @brief Initializes the log queue and start the log thread.
      *
@@ -55,7 +55,7 @@ public:
 
 private:
 
-#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
+#if CONFIG_COMMONS_LOGGING_DEFERRED
     /**
      * @brief Entry function for the log thread.
      *
@@ -78,7 +78,7 @@ private:
 
     inline static uint32_t mLogThresholdCounter = 0;  // Counter for tracking log message threshold
     static struct k_sem    mDataReadySem;             // Semaphore to signal that data is ready for processing
-#endif
+#endif // CONFIG_COMMONS_LOGGING_DEFERRED
 
     inline static bool     mPanicModeEnabled = false; // Flag to indicate if panic mode is enabled
 };

@@ -4,8 +4,8 @@
 # Author: Manoj Kumar Paladugu <paladugumanojkumar@gmail.com>
 #
 
-if(DEFINED CONFIG_LIB_COMMONS_LOGGING_DEFERRED AND NOT DEFINED CONFIG_LIB_COMMONS_LOGGING_THRESHOLD)
-    message(FATAL_ERROR "CONFIG_LIB_COMMONS_LOGGING_THRESHOLD is not defined.\
+if(DEFINED CONFIG_COMMONS_LOGGING_DEFERRED AND NOT DEFINED CONFIG_COMMONS_LOGGING_THRESHOLD)
+    message(FATAL_ERROR "CONFIG_COMMONS_LOGGING_THRESHOLD is not defined.\
                          Please set the threshold.")
 endif()
 

@@ -4,36 +4,36 @@
 # Author: Manoj Kumar Paladugu <paladugumanojkumar@gmail.com>
 #
 
-config LIB_COMMONS_LOGGING
+config COMMONS_LOGGING
   bool "Enable custom logging"
   default n
   help
     This option enables commons logging library.
 
-config LIB_COMMONS_LOGGING_TOKENIZED
+config COMMONS_LOGGING_TOKENIZED
   bool "Enable tokenized logging"
-  depends on LIB_COMMONS_LOGGING
+  depends on COMMONS_LOGGING
   default n
   help
     This option enables string tokenization mode in commons logging library.
 
-config LIB_COMMONS_LOGGING_DEFERRED
+config COMMONS_LOGGING_DEFERRED
   bool "Deferred logging"
-  depends on LIB_COMMONS_LOGGING
+  depends on COMMONS_LOGGING
   default n
   help
-    Log messages are buffered and processed later.This mode has the
+    Log messages are buffered and processed later. This mode has the
     least impact on the application. Time consuming processing is
     deferred to the known context.
 
-config LIB_COMMONS_LOGGING_THRESHOLD
+config COMMONS_LOGGING_THRESHOLD
   int "Number of buffered log messages before flushing"
   default 10
-  depends on LIB_COMMONS_LOGGING_DEFERRED
+  depends on COMMONS_LOGGING_DEFERRED
   help
     When number of buffered messages reaches the threshold thread is waken up.
 
-config LIB_COMMONS_LOGGING_BUFFER_SIZE
+config COMMONS_LOGGING_BUFFER_SIZE
   int "Maximum buffer size for logging messages"
   default 128
   range 64 256
@@ -41,15 +41,22 @@ config LIB_COMMONS_LOGGING_BUFFER_SIZE
     This option sets the maximum size of the buffer used for logging messages.
     The value must be between 64 and 256 characters.
 
-config LIB_COMMONS_LOGGING_MAX_CONSUMERS
+config COMMONS_LOGGING_MAX_CONSUMERS
   int "Maximum number of consumers for logging"
   default 1
   help
     This option sets the maximum number of consumers that can receive log messages.
 
-config LIB_COMMONS_LOGGING_BASE64_ENCODING
+config COMMONS_LOGGING_BASE64_ENCODING
   bool "Enable base64 encoding for tokenized logs"
-  depends on LIB_COMMONS_LOGGING_TOKENIZED
+  depends on COMMONS_LOGGING_TOKENIZED
   default n
   help
-    This option enables base64 encoding for the tokenized logs
+    This option enables base64 encoding for the tokenized logs.
+
+config COMMONS_LOGGING_OVERFLOW
+  bool "Enable log message overflow"
+  depends on COMMONS_LOGGING_DEFERRED
+  default n
+  help
+    When new message cannot be allocated, oldest one are discarded.

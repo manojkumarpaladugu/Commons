@@ -4,7 +4,7 @@
 # Author: Manoj Kumar Paladugu <paladugumanojkumar@gmail.com>
 #
 
-if(CONFIG_LIB_COMMONS_LOGGING)
+if(CONFIG_COMMONS_LOGGING)
     set(COMMONS_LOGGING_LIBRARY_NAME CommonsLogging)
     add_library(${COMMONS_LOGGING_LIBRARY_NAME} STATIC)
 

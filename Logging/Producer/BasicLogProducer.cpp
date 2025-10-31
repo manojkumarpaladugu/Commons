@@ -40,7 +40,7 @@ void pw_log_string_HandleMessageVaList(int level,
     ASSERT(message != NULL);
 
     // Format the log message into the buffer
-    constexpr size_t cBufferSize = CONFIG_LIB_COMMONS_LOGGING_BUFFER_SIZE + 1;
+    constexpr size_t cBufferSize = CONFIG_COMMONS_LOGGING_BUFFER_SIZE + 1;
     uint8_t formattedMessage[cBufferSize];
     size_t formattedMessageLength = vsnprintf(reinterpret_cast<char*>(formattedMessage), cBufferSize, message, args);
     ASSERT(formattedMessageLength > 0 && formattedMessageLength < cBufferSize);

@@ -10,7 +10,7 @@
 // Header includes
 // ----------------------------------------------------------------------------
 
-#if CONFIG_LIB_COMMONS_LOGGING_BASE64_ENCODING
+#if CONFIG_COMMONS_LOGGING_BASE64_ENCODING
     #include "Assert.h"
     #include <pw_tokenizer/base64.h>
 #endif
@@ -58,7 +58,7 @@ private:
 
 protected:
 
-#if CONFIG_LIB_COMMONS_LOGGING_BASE64_ENCODING
+#if CONFIG_COMMONS_LOGGING_BASE64_ENCODING
     /**
      * @brief Converts the raw log message to a Base64 encoded string.
      *
@@ -86,7 +86,7 @@ protected:
         return mBase64Buffer;
     }
 
-    static constexpr size_t mBase64BufferSize = pw::tokenizer::Base64EncodedBufferSize(CONFIG_LIB_COMMONS_LOGGING_BUFFER_SIZE) + 1;
+    static constexpr size_t mBase64BufferSize = pw::tokenizer::Base64EncodedBufferSize(CONFIG_COMMONS_LOGGING_BUFFER_SIZE) + 1;
     char mBase64Buffer[mBase64BufferSize];
-#endif
+#endif // CONFIG_COMMONS_LOGGING_BASE64_ENCODING
 };

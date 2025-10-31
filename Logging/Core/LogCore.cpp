@@ -9,7 +9,7 @@
 // ----------------------------------------------------------------------------
 
 #include "LogCore.hpp"
-#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
+#if CONFIG_COMMONS_LOGGING_DEFERRED
     #include "LogQueue.hpp"
 #endif
 #include "LogConsumer.hpp"
@@ -18,7 +18,7 @@
 // Macro definitions
 // ----------------------------------------------------------------------------
 
-#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
+#if CONFIG_COMMONS_LOGGING_DEFERRED
     // Define thread stack size and priority
     #define LOG_THREAD_STACK_SIZE   (1024)
     #define LOG_THREAD_PRIORITY     (5)
@@ -28,7 +28,7 @@
 // Variable definitions
 // ----------------------------------------------------------------------------
 
-#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
+#if CONFIG_COMMONS_LOGGING_DEFERRED
     // Thread stack
     K_THREAD_STACK_DEFINE(gLogThreadStack, LOG_THREAD_STACK_SIZE);
 
@@ -49,7 +49,7 @@ void LogCore::RegisterConsumer(uint8_t id, LogToOutput &consumer)
     LogConsumer::RegisterConsumer(consumer);
 }
 
-#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
+#if CONFIG_COMMONS_LOGGING_DEFERRED
 void LogCore::InitializeQueue(void* pBuffer, size_t bufferSize)
 {
     LogQueue::Initialize(pBuffer, bufferSize);
@@ -62,13 +62,13 @@ void LogCore::InitializeQueue(void* pBuffer, size_t bufferSize)
     // Initialize the binary semaphore for data ready signal
     k_sem_init(&mDataReadySem, 0, 1);
 }
-#endif
+#endif // CONFIG_COMMONS_LOGGING_DEFERRED
 
 void LogCore::EnablePanicMode()
 {
     mPanicModeEnabled = true;
 
-#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
+#if CONFIG_COMMONS_LOGGING_DEFERRED
     // In panic mode, flush all the queued log messages immediately.
     Flushlogs();
 #endif
@@ -78,7 +78,7 @@ void LogCore::HandleLogMessage(const uint8_t* pMessage, size_t length, int level
 {
     bool deferredLogging = false;
 
-#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
+#if CONFIG_COMMONS_LOGGING_DEFERRED
     deferredLogging = true;
 #endif
 
@@ -87,28 +87,42 @@ void LogCore::HandleLogMessage(const uint8_t* pMessage, size_t length, int level
         // In immediate mode, we send the log message immediately without queuing
         LogConsumer::SendLogMessage(pMessage, length, level);
     }
-#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
+#if CONFIG_COMMONS_LOGGING_DEFERRED
     else
     {
         // In deferred mode, we can queue the log message and process later
-        LogQueue::PushLog(pMessage, length, level);
+        int rc = LogQueue::PushLog(pMessage, length, level);
+        if (rc)
+        {
+            // If pushing to the queue fails, flush all logs immediately.
+            Flushlogs();
+
+            // After flushing, try to push the log message again
+            rc = LogQueue::PushLog(pMessage, length, level);
+            if (rc)
+            {
+                // If it still fails, we drop the log message
+                return;
+            }
+        }
+
         mLogThresholdCounter++;
 
-        if (mLogThresholdCounter >= CONFIG_LIB_COMMONS_LOGGING_THRESHOLD)
+        if (mLogThresholdCounter >= CONFIG_COMMONS_LOGGING_THRESHOLD)
         {
             // If the threshold is reached, signal the log thread to process the logs
             mLogThresholdCounter = 0;
             k_sem_give(&mDataReadySem);
         }
     }
-#endif
+#endif // CONFIG_COMMONS_LOGGING_DEFERRED
 }
 
 // ----------------------------------------------------------------------------
 // Private functions
 // ----------------------------------------------------------------------------
 
-#if CONFIG_LIB_COMMONS_LOGGING_DEFERRED
+#if CONFIG_COMMONS_LOGGING_DEFERRED
 void LogCore::LogThreadEntry(void* arg1, void* arg2, void* arg3)
 {
     while (1)
@@ -128,12 +142,15 @@ void LogCore::Flushlogs()
 
     do
     {
-        LogQueue::PullLog(pMessage, messageLength, level);
-        if (pMessage)
+        int rc = LogQueue::PullLog(pMessage, messageLength, level);
+        if (rc)
         {
-            // Send the log message to all registered consumers
-            LogConsumer::SendLogMessage(pMessage, messageLength, level);
+            // No more log messages to process
+            break;
         }
+
+        // Send the log message to all registered consumers
+        LogConsumer::SendLogMessage(pMessage, messageLength, level);
     } while (pMessage);
 }
-#endif
+#endif // CONFIG_COMMONS_LOGGING_DEFERRED
